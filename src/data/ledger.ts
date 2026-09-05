@@ -84,6 +84,44 @@ const reasonFromRow = (row: RawReason): ScoreReason => ({
   createdAt: row.created_at,
 })
 
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const requireRecordArray = (backup: Record<string, unknown>, key: string) => {
+  const value = backup[key]
+  if (!Array.isArray(value) || !value.every(isRecord)) throw new Error(`Backup is missing a valid ${key} table.`)
+  return value
+}
+
+export function validateBackup(value: unknown): asserts value is BackupData {
+  if (!isRecord(value) || value.version !== 1) throw new Error('This is not a supported Sukkot Leaderboard backup.')
+  const teams = requireRecordArray(value, 'teams')
+  const sessions = requireRecordArray(value, 'sessions')
+  const events = requireRecordArray(value, 'events')
+  const settings = requireRecordArray(value, 'settings')
+  if (value.reasons !== undefined && (!Array.isArray(value.reasons) || !value.reasons.every(isRecord))) {
+    throw new Error('Backup has an invalid saved-reasons table.')
+  }
+
+  const teamIds = new Set(teams.map((team) => team.id))
+  if (!TEAM_IDS.every((id) => teamIds.has(id))) throw new Error('Backup does not contain all three houses.')
+  const sessionIds = new Set(sessions.map((session) => session.id).filter((id): id is string => typeof id === 'string' && Boolean(id)))
+  if (!sessionIds.size) throw new Error('Backup does not contain a scoring event.')
+  const activeSession = settings.find((setting) => setting.key === 'active_session_id')?.value
+  if (typeof activeSession !== 'string' || !sessionIds.has(activeSession)) throw new Error('Backup does not identify a valid active scoring event.')
+
+  const eventTypes = new Set<ScoreEvent['type']>(['seed', 'add', 'deduct', 'transfer', 'tithe', 'atonement', 'undo'])
+  for (const event of events) {
+    const day = event.day_number ?? 1
+    if (typeof event.id !== 'string' || typeof event.session_id !== 'string' || !sessionIds.has(event.session_id)) throw new Error('Backup contains an event with an invalid session.')
+    if (!eventTypes.has(event.event_type as ScoreEvent['type'])) throw new Error('Backup contains an unknown score-event type.')
+    if (!Number.isSafeInteger(event.points) || Number(event.points) <= 0) throw new Error('Backup contains an invalid point value.')
+    if (!Number.isInteger(day) || Number(day) < 1 || Number(day) > 8) throw new Error('Backup contains an invalid trip day.')
+    for (const team of [event.source_team, event.destination_team]) {
+      if (team !== null && team !== undefined && !TEAM_IDS.includes(team as TeamId)) throw new Error('Backup contains an unknown house reference.')
+    }
+  }
+}
+
 export function calculateScores(events: ScoreEvent[]): Record<TeamId, number> {
   const scores = Object.fromEntries(TEAM_IDS.map((id) => [id, 0])) as Record<TeamId, number>
   for (const event of events) {
@@ -333,10 +371,14 @@ export class ScoreLedger {
     return { version: 1, exportedAt: new Date().toISOString(), teams, sessions, events, settings, reasons }
   }
 
-  async importBackup(backup: BackupData) {
-    if (backup.version !== 1 || !Array.isArray(backup.events) || !Array.isArray(backup.sessions)) {
-      throw new Error('This is not a supported Sukkot Leaderboard backup')
-    }
+  async exportDatabase(): Promise<Uint8Array> {
+    const bytes = await this.database.exportBytes()
+    if (!bytes) throw new Error('The native app already stores SQLite as a file on disk.')
+    return bytes
+  }
+
+  async importBackup(backup: unknown) {
+    validateBackup(backup)
     const steps: Array<{ sql: string; params?: unknown[] }> = [
       { sql: 'DELETE FROM score_events' },
       { sql: 'DELETE FROM scoring_sessions' },

@@ -1304,8 +1304,12 @@ html[data-theme='dark'] .flow-donut.empty { background: #3b475d; }
 .wheel-weight-list select { min-width: 84px; height: 34px; color: var(--color-ink); border: 1px solid #cdbf9e; border-radius: .35rem; background: #fff9ea; font-size: .62rem; }
 .settings-event-data { margin-top: .7rem; padding-top: .65rem; border-top: 1px solid rgb(157 116 18 / .22); }
 .settings-event-data > .eyebrow { margin: 0 0 .35rem; }
-.settings-data-tools .data-actions { grid-template-columns: repeat(4, 1fr); }
+.settings-data-tools .data-actions { grid-template-columns: repeat(5, 1fr); }
 .settings-data-tools .data-actions button { min-height: 38px; font-size: .59rem; }
+.data-feedback { margin: .45rem 0 0; padding: .4rem .5rem; border: 1px solid #cdbf9e; border-radius: .4rem; color: var(--color-muted); background: #fff9ea; font-size: .62rem; font-weight: 800; }
+.data-feedback.success { color: var(--color-success); border-color: color-mix(in srgb, var(--color-success) 38%, transparent); }
+.data-feedback.error { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 38%, transparent); }
+.data-feedback.busy { color: var(--color-gold-dark); }
 .settings-data-tools .reset-form { position: static; width: 100%; margin-top: .55rem; }
 
 .day-switcher { grid-template-columns: 108px 1fr; gap: .1rem .45rem; margin-bottom: .25rem; padding: .28rem .45rem; }
@@ -1419,6 +1423,7 @@ html[data-theme='dark'] .flow-donut.empty { background: #3b475d; }
 @keyframes wheel-impact { 0% { transform: scale(1); } 32% { transform: scale(1.035); filter: brightness(1.18); } 62% { transform: scale(.988); } 100% { transform: scale(1); filter: none; } }
 
 html[data-theme='dark'] .settings-menu, html[data-theme='dark'] .wheel-dialog { color: var(--color-ink); border-color: rgb(214 169 42 / .42); background: var(--color-surface); }
+html[data-theme='dark'] .data-feedback { background: #111d33; }
 html[data-theme='dark'] .wheel-weight-list label, html[data-theme='dark'] .wheel-weight-list select, html[data-theme='dark'] .inline-reason-add input { color: var(--color-ink); border-color: #4b5870; background: #111d33; }
 html[data-theme='dark'] .wheel-weight-list strong { color: var(--color-ink); }
 html[data-theme='dark'] .wheel-weight-list small, html[data-theme='dark'] .settings-help { color: var(--color-muted); }

@@ -47,3 +47,5 @@ When adding more data points:
 6. Add unit tests that reconcile the new metric with ledger score behavior.
 
 Avoid embedding business calculations directly in JSX. Components should consume typed, derived metrics.
+
+Organizer data tools call typed ledger methods directly rather than dispatching a custom window event. Browser downloads attach a temporary anchor to the document and defer object-URL revocation for WebKit compatibility. The database adapter exposes read-only byte export in the browser; native builds use their existing on-disk file.

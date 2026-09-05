@@ -50,6 +50,15 @@ The standard projector view includes a compact **Point story** strip, a slow con
 
 For safe live use, export a JSON backup before the event and after each day. JSON import replaces the current local database after confirmation. CSV export contains the active session's event history for reporting.
 
+### Inspecting the SQLite database
+
+There is no SQLite server to connect to: SQLite is an embedded file/database engine.
+
+- **Browser development:** `sql.js` keeps a real SQLite database in memory and serializes its bytes to IndexedDB database `sukkot-leaderboard-storage`, object store `database`, key `sukkot-leaderboard-sqlite-v1`. In Organizer settings, choose **SQLite DB** to download a normal `.sqlite3` snapshot, then open it with DB Browser for SQLite, a VS Code SQLite viewer, DataGrip, or `sqlite3 path/to/file.sqlite3`.
+- **Tauri app:** the SQL plugin stores `sukkot-leaderboard.db` under the app configuration directory. With the current bundle identifier, the macOS path is normally `~/Library/Application Support/org.sukkotcamp.leaderboard/sukkot-leaderboard.db`. Close the app or inspect a copied snapshot rather than editing the live file.
+
+JSON backup, history CSV, and browser SQLite exports show an inline success or error message. Imports are fully validated before the existing database is replaced, and the replacement remains one SQLite transaction.
+
 ## Banners and customization
 
 Offline placeholder banners are in `public/banners/`:

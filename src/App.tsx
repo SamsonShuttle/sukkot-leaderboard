@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, LoaderCircle } from 'lucide-react'
 import { ScoreLedger } from './data/ledger'
-import type { BackupData, ColorTheme, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelWeights } from './types'
+import type { ColorTheme, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelWeights } from './types'
 import { TEAMS } from './types'
 import { PublicLeaderboard } from './components/PublicLeaderboard'
 import { OrganizerView } from './components/OrganizerView'
-import { downloadFile } from './lib/format'
 import { DataDashboard } from './components/DataDashboard'
 
 let openLedgerPromise: Promise<ScoreLedger> | undefined
@@ -107,16 +106,6 @@ export default function App() {
     }
   }, [ledger, refresh])
 
-  useEffect(() => {
-    const handler = async () => {
-      if (!ledger) return
-      const data = await ledger.exportBackup()
-      downloadFile(JSON.stringify(data, null, 2), `sukkot-leaderboard-${new Date().toISOString().slice(0, 10)}.json`, 'application/json')
-    }
-    window.addEventListener('request-backup', handler)
-    return () => window.removeEventListener('request-backup', handler)
-  }, [ledger])
-
   if (status === 'loading') return <div className="app-loading"><LoaderCircle className="animate-spin" /><h1>Opening the score ledger…</h1><p>Preparing local SQLite storage</p></div>
   if (status === 'error' || !ledger) return <div className="app-error"><AlertTriangle /><h1>Database unavailable</h1><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></div>
 
@@ -134,7 +123,9 @@ export default function App() {
     updates?.postMessage({ type: 'scores-changed', event: compensation })
   }
   const newEvent = async (name: string, seeds: Partial<Record<TeamId, number>>) => { await ledger.startNewEvent(name, seeds); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
-  const importBackup = async (backup: BackupData) => { await ledger.importBackup(backup); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
+  const exportBackup = () => ledger.exportBackup()
+  const exportDatabase = () => ledger.exportDatabase()
+  const importBackup = async (backup: unknown) => { await ledger.importBackup(backup); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
   const setActiveDay = async (day: TripDay) => { await ledger.setActiveDay(day); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
   const addReason = async (label: string) => { await ledger.addReason(label); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
   const setWheelWeights = async (weights: WheelWeights) => { await ledger.setWheelWeights(weights); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
@@ -149,7 +140,7 @@ export default function App() {
   const dashboard = route.startsWith('#/dashboard')
   const toggleTheme = () => setTheme((current) => current === 'light' ? 'dark' : 'light')
 
-  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetWheelWeights={setWheelWeights} />
+  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onExportBackup={exportBackup} onExportDatabase={exportDatabase} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetWheelWeights={setWheelWeights} />
   if (dashboard) return <DataDashboard state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} />
   return <PublicLeaderboard state={state} status={status} storageKind={ledger.storageKind} latestEvent={latestEvent} theme={theme} onToggleTheme={toggleTheme} />
 }

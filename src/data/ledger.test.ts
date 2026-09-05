@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateDaySummaries, calculateScores } from './ledger'
+import { calculateDaySummaries, calculateScores, validateBackup } from './ledger'
 import type { ScoreEvent } from '../types'
 
 const event = (partial: Partial<ScoreEvent>): ScoreEvent => ({
@@ -56,5 +56,34 @@ describe('calculateScores', () => {
     ], 1)
     expect(status.bases).toEqual({ judah: 50, israel: 40 })
     expect(status.appliedRate).toBe(10)
+  })
+})
+
+describe('backup validation', () => {
+  const validBackup = {
+    version: 1,
+    exportedAt: '2026-09-05T12:00:00.000Z',
+    teams: [
+      { id: 'judah' },
+      { id: 'israel' },
+      { id: 'levi' },
+    ],
+    sessions: [{ id: 'session-1', name: 'Sukkot Camp', created_at: '2026-09-05T12:00:00.000Z', active_day: 1 }],
+    events: [],
+    settings: [{ key: 'active_session_id', value: 'session-1' }],
+    reasons: [],
+  }
+
+  it('accepts a complete version-one backup', () => {
+    expect(() => validateBackup(validBackup)).not.toThrow()
+  })
+
+  it('rejects a backup before replacement when its active session is invalid', () => {
+    expect(() => validateBackup({ ...validBackup, settings: [{ key: 'active_session_id', value: 'missing' }] }))
+      .toThrow('valid active scoring event')
+  })
+
+  it('rejects incomplete table data before replacement', () => {
+    expect(() => validateBackup({ ...validBackup, teams: undefined })).toThrow('valid teams table')
   })
 })

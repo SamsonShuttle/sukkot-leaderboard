@@ -31,11 +31,15 @@ export function eventsToCsv(events: ScoreEvent[]) {
   return [headers.join(','), ...rows].join('\n')
 }
 
-export function downloadFile(contents: string, filename: string, type: string) {
+export function downloadFile(contents: BlobPart, filename: string, type: string) {
   const url = URL.createObjectURL(new Blob([contents], { type }))
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = filename
+  anchor.style.display = 'none'
+  document.body.append(anchor)
   anchor.click()
-  URL.revokeObjectURL(url)
+  anchor.remove()
+  // WebKit may not begin reading the blob until after the click task ends.
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000)
 }

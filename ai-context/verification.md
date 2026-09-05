@@ -53,6 +53,8 @@ Vitest covers:
 - Populated leaderboard re-ranking and recent activity under the new theme.
 - Native select controls verified at a minimum 48–52px height in WebKit.
 - No browser console errors during the design verification flow.
+- JSON, CSV, and raw SQLite exports create non-empty files from the browser organizer. JSON contained all expected tables, CSV contained the immutable event row, and `PRAGMA integrity_check` returned `ok` for the downloaded SQLite snapshot.
+- A malformed JSON backup is rejected inline before replacement. A freshly exported valid JSON backup completes a browser import/reload round trip with scores preserved and no console errors.
 
 ## Environment note
 

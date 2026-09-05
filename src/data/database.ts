@@ -7,6 +7,7 @@ export interface DatabaseAdapter {
   select<T extends Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>
   transaction(steps: Array<{ sql: string; params?: unknown[] }>): Promise<void>
   reload(): Promise<void>
+  exportBytes(): Promise<Uint8Array | null>
 }
 
 const DB_KEY = 'sukkot-leaderboard-sqlite-v1'
@@ -95,6 +96,10 @@ class BrowserSqliteAdapter implements DatabaseAdapter {
     this.database.close()
     this.database = new this.SQL.Database(bytes)
   }
+
+  async exportBytes() {
+    return this.database.export()
+  }
 }
 
 class TauriSqliteAdapter implements DatabaseAdapter {
@@ -127,6 +132,11 @@ class TauriSqliteAdapter implements DatabaseAdapter {
 
   async reload() {
     // Native SQLite reads the shared on-disk database on every query.
+  }
+
+  async exportBytes() {
+    // The native database is already a normal on-disk SQLite file.
+    return null
   }
 }
 

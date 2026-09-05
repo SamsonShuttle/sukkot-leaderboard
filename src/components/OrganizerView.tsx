@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import {
   ArrowLeftRight, ChevronLeft, CircleMinus, CirclePlus, DatabaseBackup, Download,
-  Droplets, FileDown, HeartHandshake, History, RotateCcw, Save, Settings2, Upload,
+  Droplets, FileDown, HardDriveDownload, HeartHandshake, History, RotateCcw, Save, Settings2, Upload,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { SCORING_CONFIG } from '../config'
@@ -14,6 +14,7 @@ import { StatusPill } from './StatusPill'
 import { DaySwitcher } from './DaySwitcher'
 import { ThemeToggle } from './ThemeToggle'
 import { WHEEL_OUTCOMES } from '../config'
+import { validateBackup } from '../data/ledger'
 
 type ActionMode = 'add' | 'deduct' | 'transfer' | 'tithe' | 'atonement'
 
@@ -145,37 +146,68 @@ function ScoreForm({ state, onRecord, onApplyTithe, onAddReason }: {
   )
 }
 
-function DataTools({ state, onNewEvent, onImport }: {
+function DataTools({ state, storageKind, onNewEvent, onExportBackup, onExportDatabase, onImport }: {
   state: ScoreboardState
+  storageKind?: 'browser-sqlite' | 'tauri-sqlite'
   onNewEvent: (name: string, seeds: Partial<Record<TeamId, number>>) => Promise<void>
-  onImport: (backup: BackupData) => Promise<void>
+  onExportBackup: () => Promise<BackupData>
+  onExportDatabase: () => Promise<Uint8Array>
+  onImport: (backup: unknown) => Promise<void>
 }) {
   const [showReset, setShowReset] = useState(false)
   const [name, setName] = useState('Sukkot Camp')
   const [seeds, setSeeds] = useState<Record<TeamId, number>>({ judah: 0, israel: 0, levi: 0 })
+  const [feedback, setFeedback] = useState<{ kind: 'busy' | 'success' | 'error'; message: string }>()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const backup = async () => {
-    window.dispatchEvent(new CustomEvent('request-backup'))
+    setFeedback({ kind: 'busy', message: 'Preparing JSON backup…' })
+    try {
+      const data = await onExportBackup()
+      downloadFile(JSON.stringify(data, null, 2), `sukkot-leaderboard-${new Date().toISOString().slice(0, 10)}.json`, 'application/json')
+      setFeedback({ kind: 'success', message: 'JSON backup downloaded.' })
+    } catch (error) { setFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Backup could not be created.' }) }
+  }
+  const exportCsv = () => {
+    try {
+      downloadFile(eventsToCsv([...state.events].reverse()), `sukkot-events-${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv;charset=utf-8')
+      setFeedback({ kind: 'success', message: 'History CSV downloaded.' })
+    } catch (error) { setFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'CSV could not be created.' }) }
+  }
+  const exportSqlite = async () => {
+    setFeedback({ kind: 'busy', message: 'Preparing SQLite database…' })
+    try {
+      const bytes = await onExportDatabase()
+      downloadFile(new Uint8Array(bytes), `sukkot-leaderboard-${new Date().toISOString().slice(0, 10)}.sqlite3`, 'application/vnd.sqlite3')
+      setFeedback({ kind: 'success', message: 'SQLite database downloaded for inspection.' })
+    } catch (error) { setFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'SQLite database could not be exported.' }) }
   }
   const importFile = async (file?: File) => {
     if (!file) return
     try {
-      const parsed = JSON.parse(await file.text()) as BackupData
-      if (!window.confirm('Importing will replace all local leaderboard data. Continue?')) return
+      setFeedback({ kind: 'busy', message: 'Checking backup…' })
+      const parsed: unknown = JSON.parse(await file.text())
+      validateBackup(parsed)
+      if (!window.confirm('Importing will replace all local leaderboard data. Continue?')) {
+        setFeedback({ kind: 'success', message: 'Import cancelled; local data was not changed.' })
+        return
+      }
       await onImport(parsed)
-    } catch (error) { window.alert(error instanceof Error ? error.message : 'Backup could not be imported.') }
+      setFeedback({ kind: 'success', message: 'Backup imported and database reloaded.' })
+    } catch (error) { setFeedback({ kind: 'error', message: error instanceof Error ? error.message : 'Backup could not be imported.' }) }
     finally { if (inputRef.current) inputRef.current.value = '' }
   }
   return (
     <div className="settings-data-tools">
       <div className="data-actions">
-        <button onClick={backup}><Download />Backup JSON</button>
-        <button onClick={() => downloadFile(eventsToCsv([...state.events].reverse()), `sukkot-events-${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv')}><FileDown />History CSV</button>
-        <button onClick={() => inputRef.current?.click()}><Upload />Import backup</button>
+        <button type="button" onClick={() => void backup()}><Download />Backup JSON</button>
+        <button type="button" onClick={exportCsv}><FileDown />History CSV</button>
+        {storageKind === 'browser-sqlite' ? <button type="button" onClick={() => void exportSqlite()}><HardDriveDownload />SQLite DB</button> : null}
+        <button type="button" onClick={() => inputRef.current?.click()}><Upload />Import backup</button>
         <input ref={inputRef} hidden type="file" accept="application/json,.json" onChange={(event) => importFile(event.target.files?.[0])} />
-        <button className="reset-trigger" onClick={() => setShowReset(!showReset)}><RotateCcw />Start new event</button>
+        <button className="reset-trigger" type="button" onClick={() => setShowReset(!showReset)}><RotateCcw />Start new event</button>
       </div>
+      {feedback ? <p className={`data-feedback ${feedback.kind}`} role="status">{feedback.message}</p> : null}
       {showReset && <form className="reset-form" onSubmit={async (event) => { event.preventDefault(); if (!window.confirm('Start a new event? The current event stays in backup history.')) return; await onNewEvent(name, seeds); setShowReset(false) }}>
         <h3>New event / reset scores</h3><p>This creates a fresh ledger. Previous sessions remain in the database.</p>
         <label>Event name<input value={name} onChange={(event) => setName(event.target.value)} /></label>
@@ -186,10 +218,13 @@ function DataTools({ state, onNewEvent, onImport }: {
   )
 }
 
-function OrganizerSettings({ state, onNewEvent, onImport, onSetWheelWeights }: {
+function OrganizerSettings({ state, storageKind, onNewEvent, onExportBackup, onExportDatabase, onImport, onSetWheelWeights }: {
   state: ScoreboardState
+  storageKind?: 'browser-sqlite' | 'tauri-sqlite'
   onNewEvent: (name: string, seeds: Partial<Record<TeamId, number>>) => Promise<void>
-  onImport: (backup: BackupData) => Promise<void>
+  onExportBackup: () => Promise<BackupData>
+  onExportDatabase: () => Promise<Uint8Array>
+  onImport: (backup: unknown) => Promise<void>
   onSetWheelWeights: (weights: WheelWeights) => Promise<void>
 }) {
   const [open, setOpen] = useState(false)
@@ -207,12 +242,12 @@ function OrganizerSettings({ state, onNewEvent, onImport, onSetWheelWeights }: {
       <div className="wheel-weight-list">
         {WHEEL_OUTCOMES.map((outcome) => <label key={outcome.id}><span><strong>{outcome.label}</strong><small>{outcome.detail}</small></span><select value={state.wheelWeights[outcome.id]} disabled={saving === outcome.id} onChange={(event) => void updateWeight(outcome.id, Number(event.target.value))}><option value="0">Off</option><option value="1">Rare</option><option value="2">Low</option><option value="3">Standard</option><option value="4">Likely</option><option value="5">Favoured</option></select></label>)}
       </div>
-      <div className="settings-event-data"><p className="eyebrow">Event data</p><DataTools state={state} onNewEvent={onNewEvent} onImport={onImport} /></div>
+      <div className="settings-event-data"><p className="eyebrow">Event data</p><DataTools state={state} storageKind={storageKind} onNewEvent={onNewEvent} onExportBackup={onExportBackup} onExportDatabase={onExportDatabase} onImport={onImport} /></div>
     </section> : null}
   </div>
 }
 
-export function OrganizerView({ state, status, storageKind, theme, onToggleTheme, onRecord, onApplyTithe, onUndo, onNewEvent, onImport, onSetDay, onAddReason, onSetWheelWeights }: {
+export function OrganizerView({ state, status, storageKind, theme, onToggleTheme, onRecord, onApplyTithe, onUndo, onNewEvent, onExportBackup, onExportDatabase, onImport, onSetDay, onAddReason, onSetWheelWeights }: {
   state: ScoreboardState
   status: 'loading' | 'ready' | 'error'
   storageKind?: 'browser-sqlite' | 'tauri-sqlite'
@@ -222,13 +257,15 @@ export function OrganizerView({ state, status, storageKind, theme, onToggleTheme
   onApplyTithe: (rate: TitheRate, operator?: string, note?: string) => Promise<void>
   onUndo: (event: ScoreEvent) => Promise<void>
   onNewEvent: (name: string, seeds: Partial<Record<TeamId, number>>) => Promise<void>
-  onImport: (backup: BackupData) => Promise<void>
+  onExportBackup: () => Promise<BackupData>
+  onExportDatabase: () => Promise<Uint8Array>
+  onImport: (backup: unknown) => Promise<void>
   onSetDay: (day: TripDay) => Promise<void>
   onAddReason: (label: string) => Promise<void>
   onSetWheelWeights: (weights: WheelWeights) => Promise<void>
 }) {
   return <main className="organizer-view">
-    <header className="organizer-header"><a href="#/" className="back-link"><ChevronLeft />Projector</a><section className="mini-scoreboard" aria-label="Current event totals">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section><div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><OrganizerSettings state={state} onNewEvent={onNewEvent} onImport={onImport} onSetWheelWeights={onSetWheelWeights} /></div></header>
+    <header className="organizer-header"><a href="#/" className="back-link"><ChevronLeft />Projector</a><section className="mini-scoreboard" aria-label="Current event totals">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section><div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><OrganizerSettings state={state} storageKind={storageKind} onNewEvent={onNewEvent} onExportBackup={onExportBackup} onExportDatabase={onExportDatabase} onImport={onImport} onSetWheelWeights={onSetWheelWeights} /></div></header>
     <DaySwitcher activeDay={state.session.activeDay} summaries={state.daySummaries} onSelect={onSetDay} />
     <div className="score-context-label">Current event totals · New entries and undos are tagged Day {state.session.activeDay}</div>
     <div className="organizer-grid"><ScoreForm state={state} onRecord={onRecord} onApplyTithe={onApplyTithe} onAddReason={onAddReason} /><aside className="organizer-side"><div className="control-card history-card"><div className="control-card-heading"><div><p className="eyebrow">Immutable ledger</p><h2>Day {state.session.activeDay} activity</h2></div><History /></div><ActivityFeed events={state.events} limit={50} organizer groupedByDay daySummaries={state.daySummaries} activeDay={state.session.activeDay} onUndo={(event) => void onUndo(event)} /></div></aside></div>

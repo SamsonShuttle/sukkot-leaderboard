@@ -37,6 +37,9 @@
 - Wheel outcome text lives in a six-colour legend above the graphic. Repeated weighted tickets reuse their outcome colour but are interleaved around the circle whenever the configured weights permit.
 - Wheel tickets also retain short, dynamically sized value callouts for at-a-glance reading. Spin drama uses CSS shake, friction rings, and sparks around the graphic, while the final result receives the dominant animated treatment and reduced-motion preferences suppress continuous effects.
 - Sparse activity feeds repeat the latest available entries to fill a full projector-width crawl. The ticker uses narrower cards and a 96-second-or-longer loop so activity remains dense but calm.
+- JSON/CSV downloads use an attached temporary link and delayed blob-URL cleanup so WebKit has time to begin reading the file. Data-tool failures are displayed inline instead of surfacing as unhandled async errors or blocking alerts.
+- Backup import must validate the complete backup and its active-session/event references before the destructive transaction begins. A failed validation leaves the existing database untouched.
+- Browser users can export the exact serialized SQLite bytes as a `.sqlite3` inspection snapshot. This is separate from the portable JSON backup and must not be edited and re-imported as application data.
 
 ## Product choices that may be revisited explicitly
 

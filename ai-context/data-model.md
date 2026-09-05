@@ -53,8 +53,10 @@ Add future data dimensions to the immutable event schema and analytics types/fun
 - Tauri: `@tauri-apps/plugin-sql` opens `sqlite:sukkot-leaderboard.db` on disk.
 - Browser tabs use `BroadcastChannel` to reload changed bytes and update projector/dashboard views.
 
+Browser IndexedDB details are intentionally stable for troubleshooting: database `sukkot-leaderboard-storage`, object store `database`, key `sukkot-leaderboard-sqlite-v1`. The organizer can export those bytes as a standard `.sqlite3` snapshot for IDE inspection. Native SQLite is stored relative to Tauri's app configuration directory.
+
 Migrations inspect SQLite schema with `PRAGMA table_info` before adding newer columns so first-release databases upgrade in place.
 
 ## Backup compatibility
 
-JSON backup contains teams, sessions, events, settings, and saved reasons. Import uses explicit column lists and defaults missing legacy `active_day`, `day_number`, and `reason` values safely. CSV includes day, reason, operator, note, and reversal identifiers.
+JSON backup contains teams, sessions, events, settings, and saved reasons. Import validates all required table arrays, the three house records, active-session reference, event types, point values, days, and house references before starting replacement. It then uses one transaction with explicit column lists and defaults missing legacy `active_day`, `day_number`, and `reason` values safely. CSV includes day, reason, operator, note, and reversal identifiers.
