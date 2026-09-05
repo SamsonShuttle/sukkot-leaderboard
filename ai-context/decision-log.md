@@ -35,6 +35,8 @@
 - Low-opacity Hebrew alphabet characters replace the isolated lower-right ornament as the shared parchment/linen background field; no external font is required.
 - Wheel selection is pointer-led: stopping first chooses one equal-sized weighted ticket, computes the exact rotation that centres that ticket beneath the fixed pointer, and announces that ticket only after deceleration completes.
 - Wheel outcome text lives in a six-colour legend above the graphic. Repeated weighted tickets reuse their outcome colour but are interleaved around the circle whenever the configured weights permit.
+- Wheel tickets also retain short, dynamically sized value callouts for at-a-glance reading. Spin drama uses CSS shake, friction rings, and sparks around the graphic, while the final result receives the dominant animated treatment and reduced-motion preferences suppress continuous effects.
+- Sparse activity feeds repeat the latest available entries to fill a full projector-width crawl. The ticker uses narrower cards and a 96-second-or-longer loop so activity remains dense but calm.
 
 ## Product choices that may be revisited explicitly
 

@@ -2,7 +2,7 @@
 
 ## Default projector analytics
 
-The normal leaderboard includes a compact “Point story” section below the team cards and a continuously moving, stock-style recent-activity ticker. Its values cover the complete current event. For each team it shows:
+The normal leaderboard includes a compact “Point story” section below the team cards and a slow continuously moving, stock-style recent-activity ticker. Sparse feeds repeat their available entries to keep the lane visually filled; cards remain close together and pause on hover. Its values cover the complete current event. For each team it shows:
 
 - effective net movement across the complete current event;
 - gross points gained;
@@ -11,7 +11,7 @@ The normal leaderboard includes a compact “Point story” section below the te
 
 The strip contains a clear Full data dashboard button, and the projector header also contains a dashboard icon button.
 
-The projector also exposes a bottom-right Spin the wheel control. Its modal fits within the projector page, places a colour legend above an uncluttered wheel, spins continuously until Stop is clicked, and produces a clearly labelled facilitation result only; it never mutates the score ledger. Organizer settings controls each outcome's relative chance. Weighted outcomes appear as equal-sized, colour-coded tickets distributed around the wheel, so the segment under the fixed pointer always reconciles with the announced result.
+The projector also exposes a bottom-right Spin the wheel control. Its modal fits within the projector page, places a colour legend above the wheel, and renders a compact value inside every ticket (`10%`, `2`, `3`, `4`, `PASS`, or `↻`). Callout sizing adapts to the number of weighted tickets. The wheel spins continuously until Stop is clicked, with subtle shake, friction rings, and outward sparks building tension; the final facilitation result is a large animated callout. These effects respect reduced-motion preferences. The wheel never mutates the score ledger. Organizer settings controls each outcome's relative chance. Weighted outcomes appear as equal-sized, colour-coded tickets distributed around the wheel, so the segment under the fixed pointer always reconciles with the announced result.
 
 ## Full dashboard
 

@@ -10,6 +10,15 @@ export const WHEEL_COLOURS: Record<WheelOutcomeId, string> = {
   'spin-again': '#2563EB',
 }
 
+export const WHEEL_LABEL_COLOURS: Record<WheelOutcomeId, string> = {
+  'tithe-10': '#14213D',
+  'turtle-dove': '#FFFFFF',
+  ram: '#FFFFFF',
+  ox: '#FFFFFF',
+  'free-pass': '#FFFFFF',
+  'spin-again': '#FFFFFF',
+}
+
 export type WheelTicket = {
   id: string
   outcome: (typeof WHEEL_OUTCOMES)[number]

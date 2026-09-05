@@ -17,12 +17,12 @@ export const SCORING_CONFIG = {
 } as const
 
 export const WHEEL_OUTCOMES = [
-  { id: 'tithe-10', label: '10% Tithe', detail: 'Apply manually if called' },
-  { id: 'turtle-dove', label: 'Turtle Dove', detail: '2-point Atonement' },
-  { id: 'ram', label: 'Ram', detail: '3-point Atonement' },
-  { id: 'ox', label: 'Ox', detail: '4-point Atonement' },
-  { id: 'free-pass', label: 'Free pass', detail: 'No points applied' },
-  { id: 'spin-again', label: 'Spin again', detail: 'Spin once more' },
+  { id: 'tithe-10', label: '10% Tithe', callout: '10%', detail: 'Apply manually if called' },
+  { id: 'turtle-dove', label: 'Turtle Dove', callout: '2', detail: '2-point Atonement' },
+  { id: 'ram', label: 'Ram', callout: '3', detail: '3-point Atonement' },
+  { id: 'ox', label: 'Ox', callout: '4', detail: '4-point Atonement' },
+  { id: 'free-pass', label: 'Free pass', callout: 'PASS', detail: 'No points applied' },
+  { id: 'spin-again', label: 'Spin again', callout: '↻', detail: 'Spin once more' },
 ] as const
 
 export const DEFAULT_WHEEL_WEIGHTS = {

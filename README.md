@@ -21,7 +21,7 @@ Use the full-screen button in the projector header (or the browser's full-screen
 
 Use the moon/sun button in any header to switch between the default parchment **Light** mode and the matching dark-linen **Dark** mode. The preference persists locally and synchronizes across open tabs.
 
-The standard projector view includes a compact **Point story** strip, a continuously scrolling recent-activity ticker, and an optional **Spin the wheel** overlay for atonement calls. The wheel keeps spinning until Stop is pressed, then lands on and announces the same colour-coded result; organizers record any resulting points manually. Use **Full data dashboard** for cumulative score lines across all eight days, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
+The standard projector view includes a compact **Point story** strip, a slow continuously scrolling recent-activity ticker, and an optional **Spin the wheel** overlay for atonement calls. The wheel keeps spinning until Stop is pressed, shows a short callout inside every segment, adds restrained shake/spark effects while moving, then lands on and dramatically announces the same colour-coded result; organizers record any resulting points manually. Use **Full data dashboard** for cumulative score lines across all eight days, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
 
 ## Commands
 
@@ -62,7 +62,7 @@ public/banners/levi.svg
 
 Replace those files with real artwork using the same names, or update `bannerUrl` in `src/types.ts`. The wind motion is CSS-based and applies to replacement images automatically.
 
-New logos and event branding can first be dropped into `public/assets/`; its README documents the recommended `branding/` and `houses/` filenames. The interface renders house names separately, so replacement banners do not need embedded text.
+New logos, event branding, and future wheel illustrations can first be dropped into `public/assets/`; its README documents the recommended filenames. The interface renders house names separately, so replacement banners do not need embedded text.
 
 Quick point values, the large-action confirmation threshold, and the visible Tithe/Atonement labels and defaults are centralized in `src/config.ts`.
 

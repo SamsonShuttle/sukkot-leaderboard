@@ -6,16 +6,19 @@ import { teamById } from '../types'
 
 export function ActivityTicker({ events, limit = 12 }: { events: ScoreEvent[]; limit?: number }) {
   const visible = events.slice(0, limit)
+  const base = visible.length ? Array.from({ length: Math.max(8, visible.length) }, (_, index) => visible[index % visible.length]) : []
+  const scrolling = [...base, ...base]
 
   return (
     <aside className="activity-ticker" aria-label="Recent scoring activity">
       <div className="ticker-title"><Radio /><span>Recent activity</span></div>
       <div className="ticker-events">
-        {visible.length ? <div className="ticker-track">
-          {[...visible, ...visible].map((event, index) => {
+        {visible.length ? <div className="ticker-track" style={{ '--ticker-duration': `${Math.max(96, base.length * 12)}s` } as React.CSSProperties}>
+          {scrolling.map((event, index) => {
             const team = teamById(event.destinationTeam ?? event.sourceTeam)
             return (
               <motion.article
+                aria-hidden={index >= visible.length}
                 layout
                 key={`${event.id}-${index}`}
                 style={{ '--ticker-team': team?.color ?? '#D6A92A' } as React.CSSProperties}
