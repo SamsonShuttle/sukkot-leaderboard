@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Sukkot Leaderboard",
+  "version": "0.1.0",
+  "identifier": "org.sukkotcamp.leaderboard",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Sukkot Leaderboard",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 650,
+        "fullscreen": false
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Education",
+    "shortDescription": "A local-first camp score leaderboard"
+  },
+  "plugins": {
+    "sql": { "preload": ["sqlite:sukkot-leaderboard.db"] }
+  }
+}

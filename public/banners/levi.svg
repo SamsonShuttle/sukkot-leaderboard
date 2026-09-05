@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#4d7c0f"/><stop offset="1" stop-color="#1a2e05"/></linearGradient><pattern id="p" width="52" height="52" patternUnits="userSpaceOnUse"><path d="M26 2L50 26 26 50 2 26z" fill="none" stroke="#d9f99d" opacity=".06" stroke-width="2"/></pattern></defs>
+  <path fill="url(#bg)" d="M0 0h1200v560H0z"/><path fill="url(#p)" d="M0 0h1200v560H0z"/><path fill="#bef264" d="M0 0h1200v18H0zM0 542h1200v18H0z"/>
+  <circle cx="600" cy="280" r="166" fill="#0f1d04" opacity=".45"/><circle cx="600" cy="280" r="142" fill="none" stroke="#bef264" stroke-width="6" stroke-dasharray="5 16"/>
+  <g transform="translate(600 282)"><path fill="#f7fee7" d="M-73-82h146l-17 42v119q-56 35-112 0V-40z"/><path fill="#bef264" d="M-73-82L0-125 73-82 52-52H-52z"/><path fill="#365314" d="M-42-25h84v78H26V8H9v45H-9V8h-17v45h-16z"/><path fill="#facc15" d="M-50 79h100v15H-50z"/></g>
+  <text x="88" y="310" fill="#ecfccb" font-family="Georgia,serif" font-size="56" font-weight="700" letter-spacing="8">HOUSE OF</text><text x="858" y="332" fill="#bef264" font-family="Arial Black,sans-serif" font-size="78" font-weight="900" text-anchor="middle" letter-spacing="8">LEVI</text>
+</svg>
