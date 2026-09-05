@@ -26,6 +26,13 @@
 - The dashboard's generic top KPI cards and separate day-total panel were replaced by a score-over-time line chart, per-house award-source bars, and gained-versus-taken donut charts.
 - Current placeholder SVG banners no longer embed house names, preventing duplicate labels when the interface renders the house name.
 - Future supplied artwork has a documented offline drop zone under `public/assets/`.
+- The organizer permits natural document scrolling on smaller laptop displays rather than clipping controls; its header prioritizes the three current-score KPIs over an event title.
+- New saved reasons are always available to both awards and deductions and are created inline from the score desk selector. Legacy reason rows retain their original database shape for backup compatibility.
+- Backup/import/reset and wheel configuration are contained in the organizer's top-right settings popover, leaving the ledger to occupy the recovered layout space.
+- The organizer ledger is scoped to the active recording day only; full event history remains in JSON/CSV exports and can be viewed by changing the active day.
+- The projector activity ticker duplicates its latest items into a continuous, pause-on-hover crawl.
+- The Atonement decision wheel is a non-scoring facilitation control. It uses persisted relative weights in `settings`, and any outcome must be manually recorded through the existing immutable score desk.
+- Low-opacity Hebrew alphabet characters replace the isolated lower-right ornament as the shared parchment/linen background field; no external font is required.
 
 ## Product choices that may be revisited explicitly
 

@@ -8,6 +8,7 @@ import { buildDashboardAnalytics } from '../lib/analytics'
 import { formatTime } from '../lib/format'
 import { ThemeToggle } from './ThemeToggle'
 import { ActivityTicker } from './ActivityTicker'
+import { AtonementWheel } from './AtonementWheel'
 
 export function PublicLeaderboard({ state, status, storageKind, latestEvent, theme, onToggleTheme }: {
   state: ScoreboardState
@@ -51,6 +52,7 @@ export function PublicLeaderboard({ state, status, storageKind, latestEvent, the
       <ProjectorInsights state={state} />
       <TransferMoment event={latestEvent} />
       <ActivityTicker events={state.events} />
+      <AtonementWheel weights={state.wheelWeights} />
     </main>
   )
 }

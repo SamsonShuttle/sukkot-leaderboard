@@ -2,7 +2,7 @@
 
 ## Default projector analytics
 
-The normal leaderboard includes a compact “Point story” section below the team cards. Its values cover the complete current event. For each team it shows:
+The normal leaderboard includes a compact “Point story” section below the team cards and a continuously moving, stock-style recent-activity ticker. Its values cover the complete current event. For each team it shows:
 
 - effective net movement across the complete current event;
 - gross points gained;
@@ -10,6 +10,8 @@ The normal leaderboard includes a compact “Point story” section below the te
 - the largest incoming reason/source.
 
 The strip contains a clear Full data dashboard button, and the projector header also contains a dashboard icon button.
+
+The projector also exposes a bottom-right Spin the wheel control. Its modal fits within the projector page and produces a clearly labelled facilitation result only; it never mutates the score ledger. Organizer settings controls each outcome's relative chance.
 
 ## Full dashboard
 
@@ -25,7 +27,7 @@ Dashboard data covers the complete active event. The selected day only tags new 
 
 All public and organizer routes include a persistent Light/Dark theme toggle. Light uses parchment and cream surfaces; Dark uses dark navy/linen surfaces while preserving the same antique-gold framing, serif typography, house colours, labels, and accessibility behavior.
 
-The organizer is intentionally dense at projector/desktop size: compact header, day input, current totals, scoring tabs, history, reason management, backup/import, and reset actions should all be reachable without page scrolling. Long histories and reason lists scroll inside their own panels.
+The organizer is intentionally dense at desktop size but permits natural page scrolling on smaller MacBook screens. The header is limited to back navigation, current team totals, connection/theme status, and settings. Saved reasons are created inline from the scoring selector; backup/import/reset and wheel odds live in the top-right settings menu. The ledger fills the recovered side space and only displays events for the selected active recording day.
 
 ## Future dashboard data
 

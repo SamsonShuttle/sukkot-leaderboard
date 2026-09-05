@@ -44,6 +44,8 @@ Vitest covers:
 - Compact 1600×1000 projector, organizer, and expanded dashboard layouts without document scrolling.
 - Whole-event KPIs remaining unchanged when the active recording day is switched.
 - Chart-led dashboard with cumulative score lines, award-source bars, gain/deduction rings, and the shared recent-activity ticker.
+- Compact organizer at 1440×900 with natural scrolling available, an inline reason-creation selector, settings popover, and active-day-only ledger.
+- Persisted wheel-odds changes after reload, plus projector wheel spin/reveal behavior without score mutation.
 - Mobile projector layout at 390×844, including expanded leader and compact trailing houses.
 - Populated leaderboard re-ranking and recent activity under the new theme.
 - Native select controls verified at a minimum 48–52px height in WebKit.

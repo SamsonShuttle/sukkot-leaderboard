@@ -35,7 +35,7 @@ Persistent organizer-managed dropdown catalogue: `id`, case-insensitive unique `
 
 ### `settings`
 
-Key/value application settings. `active_session_id` points to the current scoring session.
+Key/value application settings. `active_session_id` points to the current scoring session. `wheel_weights` stores the persisted relative odds (0–5 per result) for the non-scoring projector decision wheel.
 
 ## Score derivation
 

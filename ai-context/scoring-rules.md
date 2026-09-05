@@ -27,7 +27,7 @@ Analytics exclude an undone original together with its compensation so dashboard
 
 ## Persistent award/deduction reasons
 
-Organizers maintain a reason catalogue. Each reason applies to awards, deductions, or both and has Active/Hidden status. Active reasons appear in the appropriate scoring dropdown. Hidden reasons remain stored and remain visible on historical events.
+Organizers add reasons directly from the Saved reason selector. New reasons are created as `both`, so the same concise catalogue appears for awards and deductions. Legacy saved reasons retain their prior applicability/status safely; active reasons appear in the scoring dropdown.
 
 The selected reason label is copied onto each event as an immutable snapshot. A later catalogue status change therefore does not rewrite history. Free-form notes remain separate from the saved reason.
 
@@ -53,3 +53,7 @@ The base for each house is its positive net points earned on that active day bef
 Each house’s percentage result is rounded independently to the nearest whole point. Levi receives the sum of those rounded amounts. The selected percentage is stored in the event reason, for example `Daily tithe · 10%`.
 
 Tithe is intended as an end-of-day action. If later events are recorded for that day, the existing Tithe is not automatically recalculated; undo the Tithe events and apply it again if needed.
+
+## Atonement decision wheel
+
+The projector wheel is a facilitation prompt, not a scoring action. It offers 10% Tithe, Turtle Dove, Ram, Ox, Free pass, and Spin again. An organizer must manually record any resulting score event from the existing score desk, preserving the immutable ledger and its normal confirmation rules. Each outcome has a persisted 0–5 relative weight configured from Organizer settings; zero removes that outcome from the wheel and at least one outcome must remain enabled.

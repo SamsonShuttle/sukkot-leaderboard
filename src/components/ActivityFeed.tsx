@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, RotateCcw, Sparkles } from 'lucide-react'
-import type { DaySummary, ScoreEvent, TeamId, TripDay } from '../types'
-import { TEAM_IDS, teamById } from '../types'
+import type { DaySummary, ScoreEvent, TripDay } from '../types'
 import { eventLabel, formatTime } from '../lib/format'
 
 const iconFor = (type: ScoreEvent['type']) => {
@@ -47,20 +46,6 @@ function EventRow({ event, undone, organizer, onUndo, showDay }: {
   )
 }
 
-function DayTotals({ summary }: { summary: DaySummary }) {
-  return (
-    <div className="day-total-scores" aria-label={`Total scores after Day ${summary.day}`}>
-      <span className="day-total-label">Total after Day {summary.day}</span>
-      {TEAM_IDS.map((teamId: TeamId) => (
-        <span className={`day-team-total team-${teamId}`} key={teamId}>
-          <i style={{ background: teamById(teamId)?.accent }} />
-          {teamById(teamId)?.shortName} <strong>{summary.closingScores[teamId]}</strong>
-        </span>
-      ))}
-    </div>
-  )
-}
-
 export function ActivityFeed({ events, limit = 8, onUndo, organizer = false, groupedByDay = false, daySummaries, activeDay }: {
   events: ScoreEvent[]
   limit?: number
@@ -73,30 +58,22 @@ export function ActivityFeed({ events, limit = 8, onUndo, organizer = false, gro
   const undoneIds = new Set(events.filter((event) => event.reversesEventId).map((event) => event.reversesEventId))
 
   if (groupedByDay && daySummaries && activeDay) {
-    const visibleDays = daySummaries
-      .filter((summary) => summary.day <= activeDay || summary.eventCount > 0)
-      .slice()
-      .reverse()
+    const summary = daySummaries.find((item) => item.day === activeDay)
+    const dayEvents = events.filter((event) => event.day === activeDay).slice(0, limit)
     return (
       <div className="activity-list grouped-history">
-        {visibleDays.map((summary) => {
-          const dayEvents = events.filter((event) => event.day === summary.day).slice(0, limit)
-          return (
-            <section className={`day-history-group ${summary.day === activeDay ? 'active' : ''}`} key={summary.day}>
-              <header className="day-history-header">
-                <div><span>Day {summary.day}</span><small>{summary.eventCount} {summary.eventCount === 1 ? 'event' : 'events'}</small></div>
-                {summary.day === activeDay ? <strong>Active</strong> : null}
-              </header>
-              <DayTotals summary={summary} />
-              <AnimatePresence initial={false}>
-                {dayEvents.map((event) => (
-                  <EventRow key={event.id} event={event} undone={undoneIds.has(event.id)} organizer={organizer} onUndo={onUndo} showDay={false} />
-                ))}
-              </AnimatePresence>
-              {!dayEvents.length ? <div className="empty-day">No scoring events recorded.</div> : null}
-            </section>
-          )
-        })}
+        <section className="day-history-group active">
+          <header className="day-history-header">
+            <div><span>Day {activeDay}</span><small>{summary?.eventCount ?? 0} {(summary?.eventCount ?? 0) === 1 ? 'event' : 'events'}</small></div>
+            <strong>Active</strong>
+          </header>
+          <AnimatePresence initial={false}>
+            {dayEvents.map((event) => (
+              <EventRow key={event.id} event={event} undone={undoneIds.has(event.id)} organizer={organizer} onUndo={onUndo} showDay={false} />
+            ))}
+          </AnimatePresence>
+          {!dayEvents.length ? <div className="empty-day">No scoring events recorded for Day {activeDay}.</div> : null}
+        </section>
       </div>
     )
   }

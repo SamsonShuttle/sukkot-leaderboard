@@ -13,7 +13,29 @@ import {
   type TeamId,
   type TitheRate,
   type TripDay,
+  type WheelOutcomeId,
+  type WheelWeights,
 } from '../types'
+import { DEFAULT_WHEEL_WEIGHTS } from '../config'
+
+const WHEEL_WEIGHTS_KEY = 'wheel_weights'
+
+const defaultWheelWeights = (): WheelWeights => ({ ...DEFAULT_WHEEL_WEIGHTS })
+
+const wheelWeightsFromValue = (value?: string): WheelWeights => {
+  if (!value) return defaultWheelWeights()
+  try {
+    const parsed = JSON.parse(value) as Partial<Record<WheelOutcomeId, unknown>>
+    const defaults = defaultWheelWeights()
+    return Object.fromEntries(Object.keys(defaults).map((key) => {
+      const id = key as WheelOutcomeId
+      const candidate = parsed[id]
+      return [id, typeof candidate === 'number' && Number.isInteger(candidate) && candidate >= 0 && candidate <= 5 ? candidate : defaults[id]]
+    })) as WheelWeights
+  } catch {
+    return defaultWheelWeights()
+  }
+}
 
 interface RawEvent extends Record<string, unknown> {
   id: string
@@ -175,7 +197,9 @@ export class ScoreLedger {
     const reasonRows = await this.database.select<RawReason>('SELECT * FROM score_reasons ORDER BY active DESC, label COLLATE NOCASE')
     const reasons = reasonRows.map(reasonFromRow)
     const titheStatus = calculateDailyTitheStatus(events, session.activeDay)
-    return { session, teams: TEAMS, scores, events, daySummaries, reasons, titheStatus }
+    const wheelSettings = await this.database.select<{ value: string }>('SELECT value FROM settings WHERE key = ?', [WHEEL_WEIGHTS_KEY])
+    const wheelWeights = wheelWeightsFromValue(wheelSettings[0]?.value)
+    return { session, teams: TEAMS, scores, events, daySummaries, reasons, titheStatus, wheelWeights }
   }
 
   async setActiveDay(day: TripDay) {
@@ -337,11 +361,10 @@ export class ScoreLedger {
     await this.database.transaction(steps)
   }
 
-  async addReason(label: string, appliesTo: ScoreReason['appliesTo']): Promise<ScoreReason> {
+  async addReason(label: string): Promise<ScoreReason> {
     const cleanLabel = label.trim()
     if (!cleanLabel) throw new Error('Enter a reason label')
     if (cleanLabel.length > 100) throw new Error('Keep reason labels to 100 characters or fewer')
-    if (!['add', 'deduct', 'both'].includes(appliesTo)) throw new Error('Choose where this reason applies')
     const existing = await this.database.select<{ id: string }>(
       'SELECT id FROM score_reasons WHERE label = ? COLLATE NOCASE',
       [cleanLabel],
@@ -350,7 +373,7 @@ export class ScoreLedger {
     const reason: ScoreReason = {
       id: crypto.randomUUID(),
       label: cleanLabel,
-      appliesTo,
+      appliesTo: 'both',
       active: true,
       createdAt: new Date().toISOString(),
     }
@@ -363,6 +386,15 @@ export class ScoreLedger {
 
   async setReasonActive(id: string, active: boolean) {
     await this.database.execute('UPDATE score_reasons SET active = ? WHERE id = ?', [active ? 1 : 0, id])
+  }
+
+  async setWheelWeights(weights: WheelWeights) {
+    const candidate = wheelWeightsFromValue(JSON.stringify(weights))
+    if (!Object.values(candidate).some((weight) => weight > 0)) throw new Error('Keep at least one wheel outcome enabled')
+    await this.database.execute(
+      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+      [WHEEL_WEIGHTS_KEY, JSON.stringify(candidate)],
+    )
   }
 
   async applyDailyTithe(rate: TitheRate, operator?: string, note?: string): Promise<ScoreEvent[]> {

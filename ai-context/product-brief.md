@@ -12,9 +12,9 @@ The three teams are fixed:
 
 ## Application surfaces
 
-- `#/` — compact public projector leaderboard with large current-event rankings, scores, offline animated banners, compact analytics, database status, full-screen control, navigation, and an always-visible horizontal recent-activity strip.
+- `#/` — compact public projector leaderboard with large current-event rankings, scores, offline animated banners, compact analytics, database status, full-screen control, navigation, an always-visible scrolling recent-activity strip, and a non-scoring Atonement decision wheel overlay.
 - `#/dashboard` — one-screen projector data dashboard led by visual analysis: a score-over-time line chart, per-team award-source bars, inflow/outflow donut charts, and the shared activity ticker.
-- `#/organizer` — simple control desk for active-day selection, scoring, Tithe, Atonement, reason management, immutable history, backup/import, CSV export, and starting a new event.
+- `#/organizer` — compact control desk for active-day selection, scoring, Tithe, Atonement, inline saved-reason creation, active-day immutable history, and a top-right settings menu for backup/import, CSV export, reset, and wheel odds.
 
 No authentication is required in the first version. Route separation is intentional rather than a security boundary.
 

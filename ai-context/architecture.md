@@ -22,10 +22,10 @@
 - `src/components/ProjectorInsights.tsx` — compact default-view analytics element.
 - `src/components/DataDashboard.tsx` — full data dashboard.
 - `src/components/OrganizerView.tsx` — scoring control surface.
-- `src/components/ReasonManager.tsx` — persistent reason catalogue UI.
 - `src/components/ActivityFeed.tsx` — public activity and grouped organizer history.
 - `src/components/ActivityTicker.tsx` — fixed horizontal recent-activity strip shared by projector and dashboard.
 - `src/components/ThemeToggle.tsx` — persistent, cross-tab Light/Dark control.
+- `src/components/AtonementWheel.tsx` — weighted, non-scoring projector wheel; its odds are loaded from the SQLite-backed `settings` table.
 
 ## Routing
 

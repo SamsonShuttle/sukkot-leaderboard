@@ -5,6 +5,8 @@ export type TripDay = (typeof TRIP_DAYS)[number]
 export type ReasonAppliesTo = 'add' | 'deduct' | 'both'
 export type TitheRate = 5 | 10
 export type ColorTheme = 'light' | 'dark'
+export type WheelOutcomeId = 'tithe-10' | 'turtle-dove' | 'ram' | 'ox' | 'free-pass' | 'spin-again'
+export type WheelWeights = Record<WheelOutcomeId, number>
 
 export type EventType =
   | 'seed'
@@ -78,6 +80,7 @@ export interface ScoreboardState {
   daySummaries: DaySummary[]
   reasons: ScoreReason[]
   titheStatus: DailyTitheStatus
+  wheelWeights: WheelWeights
 }
 
 export interface NewScoreEvent {

@@ -21,7 +21,7 @@ Use the full-screen button in the projector header (or the browser's full-screen
 
 Use the moon/sun button in any header to switch between the default parchment **Light** mode and the matching dark-linen **Dark** mode. The preference persists locally and synchronizes across open tabs.
 
-The standard projector view includes a compact **Point story** strip and a fixed recent-activity ticker. Use **Full data dashboard** for cumulative score lines across all eight days, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
+The standard projector view includes a compact **Point story** strip, a continuously scrolling recent-activity ticker, and an optional **Spin the wheel** overlay for atonement calls. The wheel only reveals a prompt; organizers record any resulting points manually. Use **Full data dashboard** for cumulative score lines across all eight days, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
 
 ## Commands
 
@@ -41,10 +41,11 @@ The standard projector view includes a compact **Point story** strip and a fixed
 - Scores are calculated from an append-only `score_events` ledger. Add, deduct, transfer, tithe, atonement, seed, and undo are distinct event types.
 - Each event is assigned to one of the eight trip days. The organizer's day selector tags new entries and determines the Daily Tithe base; it does not filter the current leaderboard, dashboard, or organizer KPIs.
 - Organizer history is grouped by day and shows each house's closing total after every day. Existing databases are migrated safely, with older events assigned to Day 1.
-- Add reusable point reasons in **Point reasons**. A reason can appear for awards, deductions, or both; hiding it removes it from new dropdowns without changing historical events.
+- Add reusable point reasons directly from the **Saved reason** selector. New reasons are available for both awards and deductions; the selected label is retained on each immutable event.
 - **Atonement** always transfers from Judah or Israel to Levi. Its fixed dropdown is Turtle Dove (2 points), Ram (3 points), or Ox (4 points), with a separate note for names and behaviour/duty context.
 - **Daily Tithe** applies either 5% or 10% to both Judah and Israel at once. It uses each house's positive net points earned on the active day before tithe, excludes opening seed balances, rounds each house to the nearest whole point, and prevents duplicate active tithes for that day.
 - Undo inserts a compensating event with reversed source/destination; it never deletes the original.
+- In **Organizer settings**, adjust each wheel result between Off, Rare, Low, Standard, Likely, and Favoured. Wheel odds persist in SQLite and are included in JSON backups.
 - Starting a new event creates a new scoring session and selects it as active. Earlier sessions remain available in JSON backups.
 
 For safe live use, export a JSON backup before the event and after each day. JSON import replaces the current local database after confirmation. CSV export contains the active session's event history for reporting.

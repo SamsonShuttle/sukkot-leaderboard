@@ -1,23 +1,23 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Radio } from 'lucide-react'
 import { eventLabel, formatTime } from '../lib/format'
 import type { ScoreEvent } from '../types'
 import { teamById } from '../types'
 
-export function ActivityTicker({ events, limit = 4 }: { events: ScoreEvent[]; limit?: number }) {
+export function ActivityTicker({ events, limit = 12 }: { events: ScoreEvent[]; limit?: number }) {
   const visible = events.slice(0, limit)
 
   return (
     <aside className="activity-ticker" aria-label="Recent scoring activity">
       <div className="ticker-title"><Radio /><span>Recent activity</span></div>
       <div className="ticker-events">
-        <AnimatePresence initial={false} mode="popLayout">
-          {visible.map((event) => {
+        {visible.length ? <div className="ticker-track">
+          {[...visible, ...visible].map((event, index) => {
             const team = teamById(event.destinationTeam ?? event.sourceTeam)
             return (
               <motion.article
                 layout
-                key={event.id}
+                key={`${event.id}-${index}`}
                 style={{ '--ticker-team': team?.color ?? '#D6A92A' } as React.CSSProperties}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ export function ActivityTicker({ events, limit = 4 }: { events: ScoreEvent[]; li
               </motion.article>
             )
           })}
-        </AnimatePresence>
+        </div> : null}
         {!visible.length ? <p>Scoring activity will appear here.</p> : null}
       </div>
     </aside>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, LoaderCircle } from 'lucide-react'
 import { ScoreLedger } from './data/ledger'
-import type { BackupData, ColorTheme, NewScoreEvent, ReasonAppliesTo, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay } from './types'
+import type { BackupData, ColorTheme, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelWeights } from './types'
 import { TEAMS } from './types'
 import { PublicLeaderboard } from './components/PublicLeaderboard'
 import { OrganizerView } from './components/OrganizerView'
@@ -38,6 +38,7 @@ const emptyState: ScoreboardState = {
   })),
   reasons: [],
   titheStatus: { day: 1, bases: { judah: 0, israel: 0 }, appliedRate: null },
+  wheelWeights: { 'tithe-10': 2, 'turtle-dove': 3, ram: 2, ox: 1, 'free-pass': 2, 'spin-again': 1 },
 }
 
 export default function App() {
@@ -135,8 +136,8 @@ export default function App() {
   const newEvent = async (name: string, seeds: Partial<Record<TeamId, number>>) => { await ledger.startNewEvent(name, seeds); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
   const importBackup = async (backup: BackupData) => { await ledger.importBackup(backup); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
   const setActiveDay = async (day: TripDay) => { await ledger.setActiveDay(day); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
-  const addReason = async (label: string, appliesTo: ReasonAppliesTo) => { await ledger.addReason(label, appliesTo); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
-  const setReasonActive = async (id: string, active: boolean) => { await ledger.setReasonActive(id, active); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
+  const addReason = async (label: string) => { await ledger.addReason(label); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
+  const setWheelWeights = async (weights: WheelWeights) => { await ledger.setWheelWeights(weights); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
   const applyDailyTithe = async (rate: TitheRate, operator?: string, note?: string) => {
     const events = await ledger.applyDailyTithe(rate, operator, note)
     await refresh(ledger)
@@ -148,7 +149,7 @@ export default function App() {
   const dashboard = route.startsWith('#/dashboard')
   const toggleTheme = () => setTheme((current) => current === 'light' ? 'dark' : 'light')
 
-  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetReasonActive={setReasonActive} />
+  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetWheelWeights={setWheelWeights} />
   if (dashboard) return <DataDashboard state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} />
   return <PublicLeaderboard state={state} status={status} storageKind={ledger.storageKind} latestEvent={latestEvent} theme={theme} onToggleTheme={toggleTheme} />
 }

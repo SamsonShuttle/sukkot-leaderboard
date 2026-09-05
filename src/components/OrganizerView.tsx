@@ -6,14 +6,14 @@ import {
 import { motion } from 'framer-motion'
 import { SCORING_CONFIG } from '../config'
 import { downloadFile, eventsToCsv } from '../lib/format'
-import type { BackupData, ColorTheme, EventType, NewScoreEvent, ReasonAppliesTo, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay } from '../types'
+import type { BackupData, ColorTheme, EventType, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelOutcomeId, WheelWeights } from '../types'
 import { TEAM_IDS, teamById } from '../types'
 import { ActivityFeed } from './ActivityFeed'
 import { AnimatedNumber } from './AnimatedNumber'
 import { StatusPill } from './StatusPill'
 import { DaySwitcher } from './DaySwitcher'
-import { ReasonManager } from './ReasonManager'
 import { ThemeToggle } from './ThemeToggle'
+import { WHEEL_OUTCOMES } from '../config'
 
 type ActionMode = 'add' | 'deduct' | 'transfer' | 'tithe' | 'atonement'
 
@@ -25,10 +25,11 @@ const modeInfo: Record<ActionMode, { label: string; icon: typeof CirclePlus; hel
   atonement: { label: SCORING_CONFIG.specialActions.atonement.label, icon: HeartHandshake, helper: SCORING_CONFIG.specialActions.atonement.helper },
 }
 
-function ScoreForm({ state, onRecord, onApplyTithe }: {
+function ScoreForm({ state, onRecord, onApplyTithe, onAddReason }: {
   state: ScoreboardState
   onRecord: (input: NewScoreEvent) => Promise<void>
   onApplyTithe: (rate: TitheRate, operator?: string, note?: string) => Promise<void>
+  onAddReason: (label: string) => Promise<void>
 }) {
   const [mode, setMode] = useState<ActionMode>('add')
   const [team, setTeam] = useState<TeamId>('judah')
@@ -39,6 +40,9 @@ function ScoreForm({ state, onRecord, onApplyTithe }: {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [reason, setReason] = useState('')
+  const [newReason, setNewReason] = useState('')
+  const [addingReason, setAddingReason] = useState(false)
+  const [reasonError, setReasonError] = useState('')
   const [atonementIndex, setAtonementIndex] = useState(0)
   const [titheRate, setTitheRate] = useState<TitheRate>(10)
   const atonement = SCORING_CONFIG.specialActions.atonement.options[atonementIndex]
@@ -84,6 +88,19 @@ function ScoreForm({ state, onRecord, onApplyTithe }: {
     if ((next === 'tithe' || next === 'atonement') && team === 'levi') setTeam('judah')
   }
 
+  const saveReason = async () => {
+    if (!newReason.trim()) return
+    setReasonError('')
+    try {
+      await onAddReason(newReason)
+      setReason(newReason.trim())
+      setNewReason('')
+      setAddingReason(false)
+    } catch (cause) {
+      setReasonError(cause instanceof Error ? cause.message : 'The reason could not be saved.')
+    }
+  }
+
   return (
     <div className="control-card score-control-card">
       <div className="control-card-heading"><div><p className="eyebrow">Score desk</p><h2>Record points</h2></div><Settings2 /></div>
@@ -109,7 +126,7 @@ function ScoreForm({ state, onRecord, onApplyTithe }: {
           {TEAM_IDS.map((id) => <button type="button" key={id} data-team={id} disabled={id === team} onClick={() => setDestination(id)} className={destination === id ? 'active' : ''} style={{ '--team': teamById(id)?.color, '--tint': teamById(id)?.tint } as React.CSSProperties}><span>{teamById(id)?.shortName}</span></button>)}
         </div></>}
         {special ? <div className={`levi-destination ${mode}`}><span>Flows to</span><img src={teamById('levi')?.bannerUrl} alt="" /><strong>House of Levi</strong></div> : null}
-        {mode === 'add' || mode === 'deduct' ? <label className="select-field">Saved reason <span>optional</span><select value={reason} onChange={(event) => setReason(event.target.value)}><option value="">Choose a reason…</option>{state.reasons.filter((item) => item.active && (item.appliesTo === mode || item.appliesTo === 'both')).map((item) => <option value={item.label} key={item.id}>{item.label}</option>)}</select></label> : null}
+        {mode === 'add' || mode === 'deduct' ? <div className="saved-reason-control"><label className="select-field">Saved reason <span>optional</span><select value={reason} onChange={(event) => { if (event.target.value === '__new__') { setAddingReason(true); return } setReason(event.target.value) }}><option value="">Choose a reason…</option>{state.reasons.filter((item) => item.active).map((item) => <option value={item.label} key={item.id}>{item.label}</option>)}<option value="__new__">＋ Add a new saved reason…</option></select></label>{addingReason ? <div className="inline-reason-add"><input autoFocus maxLength={100} value={newReason} onChange={(event) => setNewReason(event.target.value)} placeholder="New reason" /><button type="button" onClick={() => void saveReason()} disabled={!newReason.trim()}>Add</button></div> : null}{reasonError ? <p className="form-error">{reasonError}</p> : null}</div> : null}
         {mode === 'atonement' ? <label className="select-field">Atonement offering<select value={atonementIndex} onChange={(event) => { const index = Number(event.target.value); setAtonementIndex(index); setPoints(SCORING_CONFIG.specialActions.atonement.options[index].points) }}>{SCORING_CONFIG.specialActions.atonement.options.map((option, index) => <option value={index} key={option.label}>{option.label} — {option.points} points</option>)}</select></label> : null}
         {mode === 'tithe' ? <div className="tithe-panel">
           <div className="tithe-rate-picker" aria-label="Daily tithe percentage">{SCORING_CONFIG.specialActions.tithe.rates.map((rate) => <button type="button" className={titheRate === rate ? 'active' : ''} onClick={() => setTitheRate(rate)} key={rate}>{rate}%</button>)}</div>
@@ -151,8 +168,7 @@ function DataTools({ state, onNewEvent, onImport }: {
     finally { if (inputRef.current) inputRef.current.value = '' }
   }
   return (
-    <div className="control-card data-card">
-      <div className="control-card-heading"><div><p className="eyebrow">Event data</p><h2>Backup & reset</h2></div><DatabaseBackup /></div>
+    <div className="settings-data-tools">
       <div className="data-actions">
         <button onClick={backup}><Download />Backup JSON</button>
         <button onClick={() => downloadFile(eventsToCsv([...state.events].reverse()), `sukkot-events-${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv')}><FileDown />History CSV</button>
@@ -170,7 +186,33 @@ function DataTools({ state, onNewEvent, onImport }: {
   )
 }
 
-export function OrganizerView({ state, status, storageKind, theme, onToggleTheme, onRecord, onApplyTithe, onUndo, onNewEvent, onImport, onSetDay, onAddReason, onSetReasonActive }: {
+function OrganizerSettings({ state, onNewEvent, onImport, onSetWheelWeights }: {
+  state: ScoreboardState
+  onNewEvent: (name: string, seeds: Partial<Record<TeamId, number>>) => Promise<void>
+  onImport: (backup: BackupData) => Promise<void>
+  onSetWheelWeights: (weights: WheelWeights) => Promise<void>
+}) {
+  const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState<WheelOutcomeId>()
+  const updateWeight = async (id: WheelOutcomeId, weight: number) => {
+    setSaving(id)
+    try { await onSetWheelWeights({ ...state.wheelWeights, [id]: weight }) }
+    finally { setSaving(undefined) }
+  }
+  return <div className="organizer-settings">
+    <button className="icon-button" type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls="organizer-settings-menu" title="Organizer settings" aria-label="Organizer settings"><Settings2 /></button>
+    {open ? <section id="organizer-settings-menu" className="settings-menu" aria-label="Organizer settings">
+      <header><div><p className="eyebrow">Organizer settings</p><h2>Wheel odds & event data</h2></div><DatabaseBackup /></header>
+      <p className="settings-help">Higher weights make an outcome more likely. “Off” removes it from the wheel.</p>
+      <div className="wheel-weight-list">
+        {WHEEL_OUTCOMES.map((outcome) => <label key={outcome.id}><span><strong>{outcome.label}</strong><small>{outcome.detail}</small></span><select value={state.wheelWeights[outcome.id]} disabled={saving === outcome.id} onChange={(event) => void updateWeight(outcome.id, Number(event.target.value))}><option value="0">Off</option><option value="1">Rare</option><option value="2">Low</option><option value="3">Standard</option><option value="4">Likely</option><option value="5">Favoured</option></select></label>)}
+      </div>
+      <div className="settings-event-data"><p className="eyebrow">Event data</p><DataTools state={state} onNewEvent={onNewEvent} onImport={onImport} /></div>
+    </section> : null}
+  </div>
+}
+
+export function OrganizerView({ state, status, storageKind, theme, onToggleTheme, onRecord, onApplyTithe, onUndo, onNewEvent, onImport, onSetDay, onAddReason, onSetWheelWeights }: {
   state: ScoreboardState
   status: 'loading' | 'ready' | 'error'
   storageKind?: 'browser-sqlite' | 'tauri-sqlite'
@@ -182,14 +224,13 @@ export function OrganizerView({ state, status, storageKind, theme, onToggleTheme
   onNewEvent: (name: string, seeds: Partial<Record<TeamId, number>>) => Promise<void>
   onImport: (backup: BackupData) => Promise<void>
   onSetDay: (day: TripDay) => Promise<void>
-  onAddReason: (label: string, appliesTo: ReasonAppliesTo) => Promise<void>
-  onSetReasonActive: (id: string, active: boolean) => Promise<void>
+  onAddReason: (label: string) => Promise<void>
+  onSetWheelWeights: (weights: WheelWeights) => Promise<void>
 }) {
   return <main className="organizer-view">
-    <header className="organizer-header"><div><a href="#/" className="back-link"><ChevronLeft />Projector view</a><p className="eyebrow">Organizer control</p><h1>{state.session.name}</h1></div><div className="header-actions"><StatusPill status={status} storageKind={storageKind} /><ThemeToggle theme={theme} onToggle={onToggleTheme} /></div></header>
+    <header className="organizer-header"><a href="#/" className="back-link"><ChevronLeft />Projector</a><section className="mini-scoreboard" aria-label="Current event totals">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section><div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><OrganizerSettings state={state} onNewEvent={onNewEvent} onImport={onImport} onSetWheelWeights={onSetWheelWeights} /></div></header>
     <DaySwitcher activeDay={state.session.activeDay} summaries={state.daySummaries} onSelect={onSetDay} />
-    <div className="score-context-label">Current event totals · New entries will be tagged Day {state.session.activeDay}</div>
-    <section className="mini-scoreboard">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section>
-    <div className="organizer-grid"><ScoreForm state={state} onRecord={onRecord} onApplyTithe={onApplyTithe} /><aside className="organizer-side"><div className="control-card history-card"><div className="control-card-heading"><div><p className="eyebrow">Immutable ledger</p><h2>History by day</h2></div><History /></div><ActivityFeed events={state.events} limit={50} organizer groupedByDay daySummaries={state.daySummaries} activeDay={state.session.activeDay} onUndo={(event) => void onUndo(event)} /></div><ReasonManager reasons={state.reasons} onAdd={onAddReason} onSetActive={onSetReasonActive} /><DataTools state={state} onNewEvent={onNewEvent} onImport={onImport} /></aside></div>
+    <div className="score-context-label">Current event totals · New entries and undos are tagged Day {state.session.activeDay}</div>
+    <div className="organizer-grid"><ScoreForm state={state} onRecord={onRecord} onApplyTithe={onApplyTithe} onAddReason={onAddReason} /><aside className="organizer-side"><div className="control-card history-card"><div className="control-card-heading"><div><p className="eyebrow">Immutable ledger</p><h2>Day {state.session.activeDay} activity</h2></div><History /></div><ActivityFeed events={state.events} limit={50} organizer groupedByDay daySummaries={state.daySummaries} activeDay={state.session.activeDay} onUndo={(event) => void onUndo(event)} /></div></aside></div>
   </main>
 }

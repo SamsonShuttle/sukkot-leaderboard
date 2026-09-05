@@ -15,3 +15,21 @@ export const SCORING_CONFIG = {
     },
   },
 } as const
+
+export const WHEEL_OUTCOMES = [
+  { id: 'tithe-10', label: '10% Tithe', detail: 'Apply manually if called' },
+  { id: 'turtle-dove', label: 'Turtle Dove', detail: '2-point Atonement' },
+  { id: 'ram', label: 'Ram', detail: '3-point Atonement' },
+  { id: 'ox', label: 'Ox', detail: '4-point Atonement' },
+  { id: 'free-pass', label: 'Free pass', detail: 'No points applied' },
+  { id: 'spin-again', label: 'Spin again', detail: 'Spin once more' },
+] as const
+
+export const DEFAULT_WHEEL_WEIGHTS = {
+  'tithe-10': 2,
+  'turtle-dove': 3,
+  ram: 2,
+  ox: 1,
+  'free-pass': 2,
+  'spin-again': 1,
+} as const
