@@ -33,6 +33,8 @@
 - The projector activity ticker duplicates its latest items into a continuous, pause-on-hover crawl.
 - The Atonement decision wheel is a non-scoring facilitation control. It uses persisted relative weights in `settings`, and any outcome must be manually recorded through the existing immutable score desk.
 - Low-opacity Hebrew alphabet characters replace the isolated lower-right ornament as the shared parchment/linen background field; no external font is required.
+- Wheel selection is pointer-led: stopping first chooses one equal-sized weighted ticket, computes the exact rotation that centres that ticket beneath the fixed pointer, and announces that ticket only after deceleration completes.
+- Wheel outcome text lives in a six-colour legend above the graphic. Repeated weighted tickets reuse their outcome colour but are interleaved around the circle whenever the configured weights permit.
 
 ## Product choices that may be revisited explicitly
 

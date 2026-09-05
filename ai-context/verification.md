@@ -46,6 +46,7 @@ Vitest covers:
 - Chart-led dashboard with cumulative score lines, award-source bars, gain/deduction rings, and the shared recent-activity ticker.
 - Compact organizer at 1440×900 with natural scrolling available, an inline reason-creation selector, settings popover, and active-day-only ledger.
 - Persisted wheel-odds changes after reload, plus projector wheel spin/reveal behavior without score mutation.
+- Exhaustive wheel-geometry tests confirm every ticket is centred under the pointer from multiple starting rotations; browser verification confirms indefinite spin-until-stop and DOM pointer/result agreement after deceleration.
 - Mobile projector layout at 390×844, including expanded leader and compact trailing houses.
 - Populated leaderboard re-ranking and recent activity under the new theme.
 - Native select controls verified at a minimum 48–52px height in WebKit.

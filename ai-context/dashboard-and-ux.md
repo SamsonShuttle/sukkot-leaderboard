@@ -11,7 +11,7 @@ The normal leaderboard includes a compact “Point story” section below the te
 
 The strip contains a clear Full data dashboard button, and the projector header also contains a dashboard icon button.
 
-The projector also exposes a bottom-right Spin the wheel control. Its modal fits within the projector page and produces a clearly labelled facilitation result only; it never mutates the score ledger. Organizer settings controls each outcome's relative chance.
+The projector also exposes a bottom-right Spin the wheel control. Its modal fits within the projector page, places a colour legend above an uncluttered wheel, spins continuously until Stop is clicked, and produces a clearly labelled facilitation result only; it never mutates the score ledger. Organizer settings controls each outcome's relative chance. Weighted outcomes appear as equal-sized, colour-coded tickets distributed around the wheel, so the segment under the fixed pointer always reconciles with the announced result.
 
 ## Full dashboard
 

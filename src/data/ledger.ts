@@ -27,11 +27,12 @@ const wheelWeightsFromValue = (value?: string): WheelWeights => {
   try {
     const parsed = JSON.parse(value) as Partial<Record<WheelOutcomeId, unknown>>
     const defaults = defaultWheelWeights()
-    return Object.fromEntries(Object.keys(defaults).map((key) => {
+    const parsedWeights = Object.fromEntries(Object.keys(defaults).map((key) => {
       const id = key as WheelOutcomeId
       const candidate = parsed[id]
       return [id, typeof candidate === 'number' && Number.isInteger(candidate) && candidate >= 0 && candidate <= 5 ? candidate : defaults[id]]
     })) as WheelWeights
+    return Object.values(parsedWeights).some((weight) => weight > 0) ? parsedWeights : defaults
   } catch {
     return defaultWheelWeights()
   }
@@ -389,8 +390,8 @@ export class ScoreLedger {
   }
 
   async setWheelWeights(weights: WheelWeights) {
+    if (!Object.values(weights).some((weight) => weight > 0)) throw new Error('Keep at least one wheel outcome enabled')
     const candidate = wheelWeightsFromValue(JSON.stringify(weights))
-    if (!Object.values(candidate).some((weight) => weight > 0)) throw new Error('Keep at least one wheel outcome enabled')
     await this.database.execute(
       'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
       [WHEEL_WEIGHTS_KEY, JSON.stringify(candidate)],
