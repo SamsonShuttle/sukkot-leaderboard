@@ -39,8 +39,12 @@ Vitest covers:
 - 10% Tithe preview and atomic transfers from both Judah and Israel.
 - Duplicate daily Tithe protection.
 - Ox Atonement with a person/duty note retained in history.
+- Printed-material projector, dashboard, and organizer theme at 1600×1000.
+- Mobile projector layout at 390×844, including expanded leader and compact trailing houses.
+- Populated leaderboard re-ranking and recent activity under the new theme.
+- Native select controls verified at a minimum 48–52px height in WebKit.
+- No browser console errors during the design verification flow.
 
 ## Environment note
 
 Node.js and npm are available. Rust/Cargo were not installed when the Tauri shell was scaffolded, so web builds are verified but native packaging has not yet been executed on this machine.
-

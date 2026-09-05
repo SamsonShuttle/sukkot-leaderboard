@@ -15,7 +15,7 @@ export function ProjectorInsights({ state }: { state: ScoreboardState }) {
           const metrics = analytics.teams[team.id]
           const leadingReason = metrics.gainedReasons[0]?.label ?? 'No points recorded'
           return (
-            <article key={team.id} style={{ '--team': team.color, '--accent': team.accent } as React.CSSProperties}>
+            <article key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}>
               <div className="insight-team-name"><i /><strong>{team.shortName}</strong><span>{metrics.net} net</span></div>
               <div className="insight-numbers"><span className="gain"><ArrowUpRight />+{metrics.gained} gained</span><span className="loss"><ArrowDownRight />−{metrics.lost} taken</span></div>
               <p title={leadingReason}>Top source: {leadingReason}</p>

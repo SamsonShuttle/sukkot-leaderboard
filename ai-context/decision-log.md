@@ -15,6 +15,10 @@
 - Tithe results round independently per house to the nearest integer.
 - The dashboard uses effective events (undone pairs removed) for understandable gross analytics, while the ledger continues to expose every record.
 - The normal projector includes compact analytics; the expanded dashboard is a separate hash route for a denser data story.
+- The 2026 printed-material design handoff supersedes the initial dark sports-dashboard palette. All routes now share a parchment/navy/gold noticeboard shell.
+- House presentation is resolved from the semantic team map: Israel royal blue, Judah parchment gold with navy foreground, and Levi crimson/wine.
+- Projector mobile layout keeps the leader expanded and renders the other houses as compact cards.
+- Git commit `4582acd` is the complete pre-redesign restore point requested by the user.
 
 ## Product choices that may be revisited explicitly
 
@@ -24,4 +28,3 @@
 - Whether a Tithe batch should have a single group-level undo button.
 - Whether the public dashboard needs its own day selector independent from the organizer’s active day.
 - Whether structured participant/duty entities should replace free-form notes.
-

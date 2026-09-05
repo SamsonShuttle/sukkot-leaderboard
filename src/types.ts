@@ -20,6 +20,9 @@ export interface Team {
   shortName: string
   color: string
   accent: string
+  tint: string
+  foreground: string
+  motif: string
   bannerUrl: string
 }
 
@@ -101,24 +104,33 @@ export const TEAMS: Team[] = [
     id: 'judah',
     name: 'House of Judah',
     shortName: 'Judah',
-    color: '#7f1d1d',
-    accent: '#fbbf24',
+    color: '#E9D5A6',
+    accent: '#9D7412',
+    tint: '#FFF1CF',
+    foreground: '#18233B',
+    motif: 'Lion',
     bannerUrl: '/banners/judah.svg',
   },
   {
     id: 'israel',
     name: 'House of Israel',
     shortName: 'Israel',
-    color: '#1e3a8a',
-    accent: '#93c5fd',
+    color: '#08247D',
+    accent: '#D6A92A',
+    tint: '#DCE5FF',
+    foreground: '#FFFFFF',
+    motif: 'Menorah',
     bannerUrl: '/banners/israel.svg',
   },
   {
     id: 'levi',
     name: 'House of Levi',
     shortName: 'Levi',
-    color: '#3f6212',
-    accent: '#bef264',
+    color: '#9B0032',
+    accent: '#D6A92A',
+    tint: '#F7DCE4',
+    foreground: '#FFFFFF',
+    motif: 'Priestly service',
     bannerUrl: '/banners/levi.svg',
   },
 ]

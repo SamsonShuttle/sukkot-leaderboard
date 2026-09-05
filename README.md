@@ -63,6 +63,8 @@ Quick point values, the large-action confirmation threshold, and the visible Tit
 
 Product rules, architecture, data semantics, design decisions, extension guidance, and verification expectations are maintained in `ai-context/`. Future coding chats should begin with the root `AGENTS.md`, which points to the relevant context documents.
 
+The printed-material theme is documented in `ai-context/design-handoff.md`. The complete app immediately before that visual redesign is preserved in local Git commit `4582acd` (`checkpoint: leaderboard before printed-material redesign`), so the design can be compared or reverted without affecting the scoring specification.
+
 ## Operational notes
 
 - Keep the projector on the public route and the scorekeeper on the organizer route. Browser tabs synchronize score changes through a local broadcast channel; no internet connection is used.

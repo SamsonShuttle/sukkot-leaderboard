@@ -31,9 +31,10 @@ No authentication is required in the first version. Route separation is intentio
 
 ## Visual identity
 
-- High-contrast dark projector surface with oversized typography.
-- Judah uses warm red/gold, Israel blue/light blue, and Levi green/lime.
-- Placeholder banners live in `public/banners/` and are designed for easy replacement.
+- A warm parchment digital noticeboard derived from the 2026 printed event materials, with a dark-navy header and antique-gold framing.
+- Israel uses royal blue, Judah parchment gold with navy ink, and Levi crimson/wine. Antique gold unifies all three houses.
+- Serif display headings pair with accessible sans-serif controls and tabular score numerals.
+- Distinctive placeholder banners live in `public/banners/` and are designed for easy replacement.
 - Flag movement is CSS/SVG-based and offline.
 - Framer Motion drives brief count, celebration, and transfer animations with reduced-motion support.
-
+- `design-handoff.md` is authoritative for tokens, house treatment, responsive behavior, and accessibility.

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560">
-  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#1d4ed8"/><stop offset="1" stop-color="#172554"/></linearGradient><pattern id="p" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M40 0L80 40 40 80 0 40z" fill="none" stroke="#fff" opacity=".05" stroke-width="3"/></pattern></defs>
-  <path fill="url(#bg)" d="M0 0h1200v560H0z"/><path fill="url(#p)" d="M0 0h1200v560H0z"/><path fill="#dbeafe" d="M0 34h1200v24H0zM0 502h1200v24H0z" opacity=".9"/>
-  <g transform="translate(600 280)" fill="none" stroke="#bfdbfe" stroke-width="13"><path d="M0-145L126 73H-126z"/><path d="M0 145L-126-73H126z"/></g><circle cx="600" cy="280" r="57" fill="#60a5fa" opacity=".18"/>
-  <g fill="#eff6ff"><path d="M552 252q48-65 96 0l-16 90h-64z" opacity=".95"/><path d="M568 240l-19-34 36 9 15-42 15 42 36-9-19 34-32-13z" fill="#facc15"/><path d="M579 273h42v12h-42zm-6 28h54v12h-54z" fill="#1e3a8a"/></g>
-  <text x="86" y="310" fill="#dbeafe" font-family="Georgia,serif" font-size="56" font-weight="700" letter-spacing="8">HOUSE OF</text><text x="866" y="332" fill="#eff6ff" font-family="Arial Black,sans-serif" font-size="70" font-weight="900" text-anchor="middle" letter-spacing="4">ISRAEL</text>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#08247D"/><stop offset="1" stop-color="#04133F"/></linearGradient><pattern id="p" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M40 0L80 40 40 80 0 40z" fill="none" stroke="#D6A92A" opacity=".08" stroke-width="3"/></pattern></defs>
+  <path fill="url(#bg)" d="M0 0h1200v560H0z"/><path fill="url(#p)" d="M0 0h1200v560H0z"/><path fill="#D6A92A" d="M0 34h1200v18H0zM0 508h1200v18H0z" opacity=".95"/>
+  <g transform="translate(600 280)" fill="none" stroke="#DCE5FF" stroke-width="13"><path d="M0-145L126 73H-126z"/><path d="M0 145L-126-73H126z"/></g><circle cx="600" cy="280" r="57" fill="#D6A92A" opacity=".16"/>
+  <g fill="#FFF9EA"><path d="M552 252q48-65 96 0l-16 90h-64z" opacity=".95"/><path d="M568 240l-19-34 36 9 15-42 15 42 36-9-19 34-32-13z" fill="#D6A92A"/><path d="M579 273h42v12h-42zm-6 28h54v12h-54z" fill="#08247D"/></g>
+  <text x="86" y="310" fill="#DCE5FF" font-family="Georgia,serif" font-size="56" font-weight="700" letter-spacing="8">HOUSE OF</text><text x="866" y="332" fill="#FFF9EA" font-family="Georgia,serif" font-size="70" font-weight="700" text-anchor="middle" letter-spacing="4">ISRAEL</text>
 </svg>

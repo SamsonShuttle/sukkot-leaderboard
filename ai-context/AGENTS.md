@@ -9,8 +9,9 @@ This folder is the durable handoff for AI agents and future development chats. R
 3. `data-model.md` — SQLite tables, event semantics, migrations, backup behavior, and analytics derivation.
 4. `architecture.md` — React structure, persistence adapters, synchronization, and extension points.
 5. `dashboard-and-ux.md` — projector, organizer, compact insights, and full dashboard behavior.
-6. `decision-log.md` — explicit decisions and interpretations made during implementation.
-7. `verification.md` — test coverage, operational commands, and known environment constraints.
+6. `design-handoff.md` — authoritative 2026 printed-material theme, tokens, responsive rules, and accessibility requirements.
+7. `decision-log.md` — explicit decisions and interpretations made during implementation.
+8. `verification.md` — test coverage, operational commands, and known environment constraints.
 
 ## Agent working rules
 
@@ -21,4 +22,3 @@ This folder is the durable handoff for AI agents and future development chats. R
 - New dashboard dimensions should be added in typed analytics structures in `src/lib/analytics.ts`.
 - Keep dashboard summaries reconcilable with the selected day’s leaderboard score.
 - Prefer small, testable pure functions for new score and analytics calculations.
-

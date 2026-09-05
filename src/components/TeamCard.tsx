@@ -11,15 +11,17 @@ export function TeamCard({ team, score, rank, latestEvent }: {
   latestEvent?: ScoreEvent
 }) {
   const delta = latestEvent ? scoreDeltaFor(latestEvent, team.id as TeamId) : 0
+  const rankLabel = rank === 1 ? '1st place' : rank === 2 ? '2nd place' : '3rd place'
   return (
     <motion.article
       layout
       className={`team-card rank-${rank}`}
-      style={{ '--team': team.color, '--accent': team.accent } as React.CSSProperties}
+      data-team={team.id}
+      style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}
       animate={delta > 0 ? { scale: [1, 1.025, 1] } : delta < 0 ? { x: [0, -4, 4, 0] } : {}}
       transition={{ duration: 0.48 }}
     >
-      <div className="rank-badge">{rank === 1 ? <Crown size={24} /> : `#${rank}`}</div>
+      <div className="rank-badge">{rank === 1 ? <Crown size={22} /> : <strong>#{rank}</strong>}<span>{rankLabel}</span></div>
       <div className="banner-shell">
         <div className="flag-wave"><img src={team.bannerUrl} alt={`${team.name} banner`} /></div>
         <div className="flag-sheen" />
@@ -27,6 +29,7 @@ export function TeamCard({ team, score, rank, latestEvent }: {
       <div className="team-card-body">
         <p className="house-label">House of</p>
         <h2>{team.shortName}</h2>
+        <span className="house-motif">{team.motif}</span>
         <AnimatedNumber className="score-number" value={score} />
         <p className="points-label">points</p>
       </div>

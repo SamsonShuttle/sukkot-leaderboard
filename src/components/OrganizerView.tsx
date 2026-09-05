@@ -98,14 +98,14 @@ function ScoreForm({ state, onRecord, onApplyTithe }: {
           <label className="field-label">{mode === 'add' ? 'Award to' : special ? 'Give from' : mode === 'deduct' ? 'Deduct from' : 'From'}</label>
           <div className="team-selector">
             {TEAM_IDS.filter((id) => !special || id !== 'levi').map((id) => (
-              <button type="button" key={id} onClick={() => setTeam(id)} className={team === id ? 'active' : ''} style={{ '--team': teamById(id)?.color } as React.CSSProperties}>
+              <button type="button" key={id} data-team={id} onClick={() => setTeam(id)} className={team === id ? 'active' : ''} style={{ '--team': teamById(id)?.color, '--tint': teamById(id)?.tint } as React.CSSProperties}>
                 <img src={teamById(id)?.bannerUrl} alt="" /><span>{teamById(id)?.shortName}</span><small>{state.scores[id]} pts</small>
               </button>
             ))}
           </div>
         </> : null}
         {mode === 'transfer' && <><label className="field-label">To</label><div className="team-selector compact">
-          {TEAM_IDS.map((id) => <button type="button" key={id} disabled={id === team} onClick={() => setDestination(id)} className={destination === id ? 'active' : ''} style={{ '--team': teamById(id)?.color } as React.CSSProperties}><span>{teamById(id)?.shortName}</span></button>)}
+          {TEAM_IDS.map((id) => <button type="button" key={id} data-team={id} disabled={id === team} onClick={() => setDestination(id)} className={destination === id ? 'active' : ''} style={{ '--team': teamById(id)?.color, '--tint': teamById(id)?.tint } as React.CSSProperties}><span>{teamById(id)?.shortName}</span></button>)}
         </div></>}
         {special ? <div className={`levi-destination ${mode}`}><span>Flows to</span><img src={teamById('levi')?.bannerUrl} alt="" /><strong>House of Levi</strong></div> : null}
         {mode === 'add' || mode === 'deduct' ? <label className="select-field">Saved reason <span>optional</span><select value={reason} onChange={(event) => setReason(event.target.value)}><option value="">Choose a reason…</option>{state.reasons.filter((item) => item.active && (item.appliesTo === mode || item.appliesTo === 'both')).map((item) => <option value={item.label} key={item.id}>{item.label}</option>)}</select></label> : null}
@@ -186,7 +186,7 @@ export function OrganizerView({ state, status, storageKind, onRecord, onApplyTit
     <header className="organizer-header"><div><a href="#/" className="back-link"><ChevronLeft />Projector view</a><p className="eyebrow">Organizer control</p><h1>{state.session.name}</h1></div><StatusPill status={status} storageKind={storageKind} /></header>
     <DaySwitcher activeDay={state.session.activeDay} summaries={state.daySummaries} onSelect={onSetDay} />
     <div className="score-context-label">Cumulative scores through Day {state.session.activeDay}</div>
-    <section className="mini-scoreboard">{state.teams.map((team) => <div key={team.id} style={{ '--team': team.color, '--accent': team.accent } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section>
+    <section className="mini-scoreboard">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section>
     <div className="organizer-grid"><ScoreForm state={state} onRecord={onRecord} onApplyTithe={onApplyTithe} /><aside className="organizer-side"><div className="control-card history-card"><div className="control-card-heading"><div><p className="eyebrow">Immutable ledger</p><h2>History by day</h2></div><History /></div><ActivityFeed events={state.events} limit={50} organizer groupedByDay daySummaries={state.daySummaries} activeDay={state.session.activeDay} onUndo={(event) => void onUndo(event)} /></div><ReasonManager reasons={state.reasons} onAdd={onAddReason} onSetActive={onSetReasonActive} /><DataTools state={state} onNewEvent={onNewEvent} onImport={onImport} /></aside></div>
   </main>
 }

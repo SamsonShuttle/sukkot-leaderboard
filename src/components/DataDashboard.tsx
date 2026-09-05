@@ -36,7 +36,7 @@ export function DataDashboard({ state, status, storageKind }: {
     <main className="data-dashboard-view">
       <header className="dashboard-header">
         <div className="dashboard-title"><a href="#/"><ArrowLeft />Leaderboard</a><p>Live data dashboard · Through Day {state.session.activeDay}</p><h1>{state.session.name}</h1></div>
-        <div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><a className="icon-button" href="#/organizer" title="Organizer controls"><Settings2 /></a></div>
+        <div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><a className="icon-button" href="#/organizer" title="Organizer controls" aria-label="Organizer controls"><Settings2 /></a></div>
       </header>
 
       <section className="dashboard-overview">
@@ -50,7 +50,7 @@ export function DataDashboard({ state, status, storageKind }: {
         {state.teams.map((team) => {
           const metrics = analytics.teams[team.id]
           return (
-            <article className="dashboard-team-card" key={team.id} style={{ '--team': team.color, '--accent': team.accent } as React.CSSProperties}>
+            <article className="dashboard-team-card" key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}>
               <header><img src={team.bannerUrl} alt="" /><div><span>House of</span><h2>{team.shortName}</h2></div><strong>{state.scores[team.id]}</strong></header>
               <div className="team-flow-summary"><span className="gain">+{metrics.gained}<small>gross gained</small></span><span className="loss">−{metrics.lost}<small>gross taken</small></span><span>{metrics.net >= 0 ? '+' : ''}{metrics.net}<small>net movement</small></span></div>
               <ReasonBars title="Where points came from" metrics={metrics.gainedReasons} kind="gain" />
