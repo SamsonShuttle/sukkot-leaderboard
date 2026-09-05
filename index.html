@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#080d1a" />
+    <meta name="theme-color" content="#F3E8CE" />
+    <script>
+      try {
+        const savedTheme = localStorage.getItem('sukkot-color-theme')
+        document.documentElement.dataset.theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : 'light'
+      } catch {
+        document.documentElement.dataset.theme = 'light'
+      }
+    </script>
     <title>Sukkot Camp Leaderboard</title>
   </head>
   <body>

@@ -19,7 +19,9 @@ Vite prints the available addresses. The default local URL is **http://localhost
 
 Use the full-screen button in the projector header (or the browser's full-screen shortcut). Data is local to the browser profile and survives restarts. You can keep the projector and organizer routes open in separate tabs; scoring changes synchronize automatically.
 
-The standard projector view includes a compact **Point story** strip showing points gained, points taken away, net movement, and each house's leading source. Use **Full data dashboard** for team-by-team reason breakdowns, transfer totals, daily progression, and scoring notes. Dashboard figures follow the organizer's active day and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
+Use the moon/sun button in any header to switch between the default parchment **Light** mode and the matching dark-linen **Dark** mode. The preference persists locally and synchronizes across open tabs.
+
+The standard projector view includes a compact **Point story** strip and a fixed recent-activity ticker. Use **Full data dashboard** for cumulative score lines across all eight days, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
 
 ## Commands
 
@@ -37,7 +39,7 @@ The standard projector view includes a compact **Point story** strip showing poi
 - **Browser development:** `sql.js` runs actual SQLite in WebAssembly. After every mutation, the SQLite database bytes are saved to IndexedDB under `sukkot-leaderboard-storage`. No network or backend is involved.
 - **Tauri desktop:** `@tauri-apps/plugin-sql` opens `sqlite:sukkot-leaderboard.db` on disk. Install the [Rust prerequisites for Tauri](https://v2.tauri.app/start/prerequisites/) before using the Tauri commands.
 - Scores are calculated from an append-only `score_events` ledger. Add, deduct, transfer, tithe, atonement, seed, and undo are distinct event types.
-- Each event is assigned to one of the eight trip days. Choose the active scoring day in the organizer view; the leaderboard then shows cumulative scores through that day.
+- Each event is assigned to one of the eight trip days. The organizer's day selector tags new entries and determines the Daily Tithe base; it does not filter the current leaderboard, dashboard, or organizer KPIs.
 - Organizer history is grouped by day and shows each house's closing total after every day. Existing databases are migrated safely, with older events assigned to Day 1.
 - Add reusable point reasons in **Point reasons**. A reason can appear for awards, deductions, or both; hiding it removes it from new dropdowns without changing historical events.
 - **Atonement** always transfers from Judah or Israel to Levi. Its fixed dropdown is Turtle Dove (2 points), Ram (3 points), or Ox (4 points), with a separate note for names and behaviour/duty context.
@@ -58,6 +60,8 @@ public/banners/levi.svg
 ```
 
 Replace those files with real artwork using the same names, or update `bannerUrl` in `src/types.ts`. The wind motion is CSS-based and applies to replacement images automatically.
+
+New logos and event branding can first be dropped into `public/assets/`; its README documents the recommended `branding/` and `houses/` filenames. The interface renders house names separately, so replacement banners do not need embedded text.
 
 Quick point values, the large-action confirmation threshold, and the visible Tithe/Atonement labels and defaults are centralized in `src/config.ts`.
 

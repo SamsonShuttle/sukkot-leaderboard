@@ -4,6 +4,7 @@ export const TRIP_DAYS = [1, 2, 3, 4, 5, 6, 7, 8] as const
 export type TripDay = (typeof TRIP_DAYS)[number]
 export type ReasonAppliesTo = 'add' | 'deduct' | 'both'
 export type TitheRate = 5 | 10
+export type ColorTheme = 'light' | 'dark'
 
 export type EventType =
   | 'seed'

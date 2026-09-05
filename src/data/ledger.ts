@@ -170,7 +170,7 @@ export class ScoreLedger {
       [sessionId],
     )
     const events = rawEvents.map(eventFromRow)
-    const scores = calculateScores(events.filter((event) => event.day <= session.activeDay))
+    const scores = calculateScores(events)
     const daySummaries = calculateDaySummaries(events)
     const reasonRows = await this.database.select<RawReason>('SELECT * FROM score_reasons ORDER BY active DESC, label COLLATE NOCASE')
     const reasons = reasonRows.map(reasonFromRow)

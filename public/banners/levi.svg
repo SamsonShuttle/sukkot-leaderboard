@@ -3,5 +3,4 @@
   <path fill="url(#bg)" d="M0 0h1200v560H0z"/><path fill="url(#p)" d="M0 0h1200v560H0z"/><path fill="#D6A92A" d="M0 0h1200v18H0zM0 542h1200v18H0z"/>
   <circle cx="600" cy="280" r="166" fill="#2C000F" opacity=".42"/><circle cx="600" cy="280" r="142" fill="none" stroke="#D6A92A" stroke-width="6" stroke-dasharray="5 16"/>
   <g transform="translate(600 282)"><path fill="#FFF9EA" d="M-73-82h146l-17 42v119q-56 35-112 0V-40z"/><path fill="#D6A92A" d="M-73-82L0-125 73-82 52-52H-52z"/><path fill="#9B0032" d="M-42-25h84v78H26V8H9v45H-9V8h-17v45h-16z"/><path fill="#D6A92A" d="M-50 79h100v15H-50z"/></g>
-  <text x="88" y="310" fill="#F7DCE4" font-family="Georgia,serif" font-size="56" font-weight="700" letter-spacing="8">HOUSE OF</text><text x="858" y="332" fill="#FFF9EA" font-family="Georgia,serif" font-size="78" font-weight="700" text-anchor="middle" letter-spacing="8">LEVI</text>
 </svg>

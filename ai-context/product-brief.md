@@ -12,8 +12,8 @@ The three teams are fixed:
 
 ## Application surfaces
 
-- `#/` — public projector leaderboard with large rankings, scores, offline animated banners, recent activity, compact analytics, database status, full-screen control, and links to the dashboard and organizer.
-- `#/dashboard` — full projector-friendly data dashboard. It explains where points came from, what was taken away, why, team flows, day progression, and explanatory notes.
+- `#/` — compact public projector leaderboard with large current-event rankings, scores, offline animated banners, compact analytics, database status, full-screen control, navigation, and an always-visible horizontal recent-activity strip.
+- `#/dashboard` — one-screen projector data dashboard led by visual analysis: a score-over-time line chart, per-team award-source bars, inflow/outflow donut charts, and the shared activity ticker.
 - `#/organizer` — simple control desk for active-day selection, scoring, Tithe, Atonement, reason management, immutable history, backup/import, CSV export, and starting a new event.
 
 No authentication is required in the first version. Route separation is intentional rather than a security boundary.
@@ -27,6 +27,7 @@ No authentication is required in the first version. Route separation is intentio
 - JSON backup/import and CSV ledger export are required.
 - The UI must clearly show successful database loading.
 - Browser projector and organizer tabs synchronize locally.
+- The organizer-selected day is a ledger input for new events, not a filter for current totals or public visuals.
 - Tauri is scaffolded for eventual macOS packaging while browser development remains first-class.
 
 ## Visual identity

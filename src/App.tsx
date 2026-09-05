@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, LoaderCircle } from 'lucide-react'
 import { ScoreLedger } from './data/ledger'
-import type { BackupData, NewScoreEvent, ReasonAppliesTo, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay } from './types'
+import type { BackupData, ColorTheme, NewScoreEvent, ReasonAppliesTo, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay } from './types'
 import { TEAMS } from './types'
 import { PublicLeaderboard } from './components/PublicLeaderboard'
 import { OrganizerView } from './components/OrganizerView'
@@ -11,6 +11,19 @@ import { DataDashboard } from './components/DataDashboard'
 let openLedgerPromise: Promise<ScoreLedger> | undefined
 const openLedger = () => openLedgerPromise ??= ScoreLedger.open()
 const updates = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('sukkot-leaderboard-updates')
+const THEME_STORAGE_KEY = 'sukkot-color-theme'
+
+const initialTheme = (): ColorTheme => {
+  const documentTheme = document.documentElement.dataset.theme
+  if (documentTheme === 'light' || documentTheme === 'dark') return documentTheme
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch {
+    // Storage can be unavailable in privacy-restricted browser contexts.
+  }
+  return 'light'
+}
 
 const emptyState: ScoreboardState = {
   session: { id: '', name: 'Sukkot Camp Leaderboard', createdAt: '', activeDay: 1 },
@@ -34,8 +47,24 @@ export default function App() {
   const [error, setError] = useState('')
   const [latestEvent, setLatestEvent] = useState<ScoreEvent>()
   const [route, setRoute] = useState(window.location.hash)
+  const [theme, setTheme] = useState<ColorTheme>(initialTheme)
 
   const refresh = useCallback(async (activeLedger: ScoreLedger) => setState(await activeLedger.getState()), [])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.documentElement.style.colorScheme = theme
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#081327' : '#F3E8CE')
+    try { localStorage.setItem(THEME_STORAGE_KEY, theme) } catch { /* Keep the in-memory preference. */ }
+  }, [theme])
+
+  useEffect(() => {
+    const syncTheme = (event: StorageEvent) => {
+      if (event.key === THEME_STORAGE_KEY && (event.newValue === 'light' || event.newValue === 'dark')) setTheme(event.newValue)
+    }
+    window.addEventListener('storage', syncTheme)
+    return () => window.removeEventListener('storage', syncTheme)
+  }, [])
 
   useEffect(() => {
     const hashChange = () => setRoute(window.location.hash)
@@ -117,8 +146,9 @@ export default function App() {
   }
   const organizer = route.startsWith('#/organizer')
   const dashboard = route.startsWith('#/dashboard')
+  const toggleTheme = () => setTheme((current) => current === 'light' ? 'dark' : 'light')
 
-  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetReasonActive={setReasonActive} />
-  if (dashboard) return <DataDashboard state={state} status={status} storageKind={ledger.storageKind} />
-  return <PublicLeaderboard state={state} status={status} storageKind={ledger.storageKind} latestEvent={latestEvent} />
+  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetReasonActive={setReasonActive} />
+  if (dashboard) return <DataDashboard state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} />
+  return <PublicLeaderboard state={state} status={status} storageKind={ledger.storageKind} latestEvent={latestEvent} theme={theme} onToggleTheme={toggleTheme} />
 }

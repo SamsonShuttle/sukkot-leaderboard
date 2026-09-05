@@ -7,7 +7,7 @@
 - Scores are derived from source/destination event deltas. This naturally guarantees equal reduction/increase for transfers.
 - Reset creates a new scoring session rather than erasing history.
 - The eight days are explicit integer fields, not inferred from calendar dates.
-- Selecting a day both chooses where new events are recorded and changes public/organizer scores to cumulative totals through that day.
+- Selecting a day chooses where new events and undo compensations are recorded; it does not filter current scores or public analytics.
 - Saved reason labels are snapshotted onto events so later hiding/restoring a catalogue option cannot alter history.
 - Atonement offerings are fixed product values: Turtle Dove 2, Ram 3, Ox 4.
 - Daily Tithe is a batch UI action represented by separate immutable source-team events so each transfer remains auditable.
@@ -19,6 +19,13 @@
 - House presentation is resolved from the semantic team map: Israel royal blue, Judah parchment gold with navy foreground, and Levi crimson/wine.
 - Projector mobile layout keeps the leader expanded and renders the other houses as compact cards.
 - Git commit `4582acd` is the complete pre-redesign restore point requested by the user.
+- The printed-material theme has two modes: parchment Light is the predictable default; Dark is a dark-linen/navy interpretation using the same house identities and gold ornament system.
+- Theme preference is local UI state, not score data. It persists in localStorage, applies before first render, and synchronizes between open tabs.
+- Active day is now a recording input only. This supersedes the earlier decision that day selection also filtered public/current scores; all current KPIs and analytics cover the complete event.
+- The projector and dashboard use a fixed horizontal activity ticker to keep recent changes visible without consuming a vertical panel.
+- The dashboard's generic top KPI cards and separate day-total panel were replaced by a score-over-time line chart, per-house award-source bars, and gained-versus-taken donut charts.
+- Current placeholder SVG banners no longer embed house names, preventing duplicate labels when the interface renders the house name.
+- Future supplied artwork has a documented offline drop zone under `public/assets/`.
 
 ## Product choices that may be revisited explicitly
 

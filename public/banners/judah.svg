@@ -3,5 +3,4 @@
   <path fill="url(#bg)" d="M0 0h1200v560H0z"/><path fill="url(#p)" d="M0 0h1200v560H0z"/><path fill="#9D7412" d="M0 0h30v560H0zM1170 0h30v560h-30z"/>
   <circle cx="600" cy="280" r="184" fill="#18233B" opacity=".12"/><circle cx="600" cy="280" r="150" fill="none" stroke="#9D7412" stroke-width="7"/><circle cx="600" cy="280" r="132" fill="url(#sun)" opacity=".22"/>
   <g fill="#9D7412"><path d="M508 242l-27-72 72 29 47-74 47 74 72-29-27 72 64 39-72 31 8 78-66-42-26 77-26-77-66 42 8-78-72-31z" opacity=".24"/><path d="M526 337c9-51 8-85 31-117 15-21 34-35 43-35 9 0 28 14 43 35 23 32 22 66 31 117-22-22-42-30-74-30s-52 8-74 30z"/><path d="M549 228l-25-31 44 8 32-40 32 40 44-8-25 31-51-14z" fill="#FFF9EA"/><circle cx="567" cy="252" r="7" fill="#18233B"/><circle cx="633" cy="252" r="7" fill="#18233B"/><path d="M571 279q29 23 58 0-10 42-29 42t-29-42z" fill="#18233B"/></g>
-  <text x="92" y="310" fill="#18233B" font-family="Georgia,serif" font-size="56" font-weight="700" letter-spacing="8">HOUSE OF</text><text x="808" y="332" fill="#6F500A" font-family="Georgia,serif" font-size="74" font-weight="700" text-anchor="middle" letter-spacing="5">JUDAH</text>
 </svg>

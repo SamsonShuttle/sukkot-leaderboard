@@ -25,7 +25,7 @@ Vitest covers:
 - daily Tithe base exclusions and active-rate detection;
 - analytics gain/loss reason grouping;
 - exclusion of undone pairs from dashboard analytics;
-- dashboard selected-day scoping.
+- dashboard analytics when an explicit reporting-day scope is requested by a caller.
 
 ## Browser verification completed during development
 
@@ -40,6 +40,10 @@ Vitest covers:
 - Duplicate daily Tithe protection.
 - Ox Atonement with a person/duty note retained in history.
 - Printed-material projector, dashboard, and organizer theme at 1600×1000.
+- Matching light parchment and dark linen modes across all three routes, with persisted preference.
+- Compact 1600×1000 projector, organizer, and expanded dashboard layouts without document scrolling.
+- Whole-event KPIs remaining unchanged when the active recording day is switched.
+- Chart-led dashboard with cumulative score lines, award-source bars, gain/deduction rings, and the shared recent-activity ticker.
 - Mobile projector layout at 390×844, including expanded leader and compact trailing houses.
 - Populated leaderboard re-ranking and recent activity under the new theme.
 - Native select controls verified at a minimum 48–52px height in WebKit.

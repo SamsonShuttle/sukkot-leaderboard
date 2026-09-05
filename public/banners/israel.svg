@@ -3,5 +3,4 @@
   <path fill="url(#bg)" d="M0 0h1200v560H0z"/><path fill="url(#p)" d="M0 0h1200v560H0z"/><path fill="#D6A92A" d="M0 34h1200v18H0zM0 508h1200v18H0z" opacity=".95"/>
   <g transform="translate(600 280)" fill="none" stroke="#DCE5FF" stroke-width="13"><path d="M0-145L126 73H-126z"/><path d="M0 145L-126-73H126z"/></g><circle cx="600" cy="280" r="57" fill="#D6A92A" opacity=".16"/>
   <g fill="#FFF9EA"><path d="M552 252q48-65 96 0l-16 90h-64z" opacity=".95"/><path d="M568 240l-19-34 36 9 15-42 15 42 36-9-19 34-32-13z" fill="#D6A92A"/><path d="M579 273h42v12h-42zm-6 28h54v12h-54z" fill="#08247D"/></g>
-  <text x="86" y="310" fill="#DCE5FF" font-family="Georgia,serif" font-size="56" font-weight="700" letter-spacing="8">HOUSE OF</text><text x="866" y="332" fill="#FFF9EA" font-family="Georgia,serif" font-size="70" font-weight="700" text-anchor="middle" letter-spacing="4">ISRAEL</text>
 </svg>

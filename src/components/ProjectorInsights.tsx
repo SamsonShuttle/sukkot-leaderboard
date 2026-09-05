@@ -3,11 +3,11 @@ import { buildDashboardAnalytics } from '../lib/analytics'
 import type { ScoreboardState } from '../types'
 
 export function ProjectorInsights({ state }: { state: ScoreboardState }) {
-  const analytics = buildDashboardAnalytics(state.events, state.session.activeDay)
+  const analytics = buildDashboardAnalytics(state.events, 8)
   return (
     <section className="projector-insights">
       <header>
-        <div><span>Point story</span><strong>Through Day {state.session.activeDay}</strong></div>
+        <div><span>Point story</span><strong>Current event</strong></div>
         <a href="#/dashboard"><ChartNoAxesCombined />Full data dashboard</a>
       </header>
       <div className="insight-team-grid">

@@ -6,13 +6,14 @@ import {
 import { motion } from 'framer-motion'
 import { SCORING_CONFIG } from '../config'
 import { downloadFile, eventsToCsv } from '../lib/format'
-import type { BackupData, EventType, NewScoreEvent, ReasonAppliesTo, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay } from '../types'
+import type { BackupData, ColorTheme, EventType, NewScoreEvent, ReasonAppliesTo, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay } from '../types'
 import { TEAM_IDS, teamById } from '../types'
 import { ActivityFeed } from './ActivityFeed'
 import { AnimatedNumber } from './AnimatedNumber'
 import { StatusPill } from './StatusPill'
 import { DaySwitcher } from './DaySwitcher'
 import { ReasonManager } from './ReasonManager'
+import { ThemeToggle } from './ThemeToggle'
 
 type ActionMode = 'add' | 'deduct' | 'transfer' | 'tithe' | 'atonement'
 
@@ -169,10 +170,12 @@ function DataTools({ state, onNewEvent, onImport }: {
   )
 }
 
-export function OrganizerView({ state, status, storageKind, onRecord, onApplyTithe, onUndo, onNewEvent, onImport, onSetDay, onAddReason, onSetReasonActive }: {
+export function OrganizerView({ state, status, storageKind, theme, onToggleTheme, onRecord, onApplyTithe, onUndo, onNewEvent, onImport, onSetDay, onAddReason, onSetReasonActive }: {
   state: ScoreboardState
   status: 'loading' | 'ready' | 'error'
   storageKind?: 'browser-sqlite' | 'tauri-sqlite'
+  theme: ColorTheme
+  onToggleTheme: () => void
   onRecord: (input: NewScoreEvent) => Promise<void>
   onApplyTithe: (rate: TitheRate, operator?: string, note?: string) => Promise<void>
   onUndo: (event: ScoreEvent) => Promise<void>
@@ -183,9 +186,9 @@ export function OrganizerView({ state, status, storageKind, onRecord, onApplyTit
   onSetReasonActive: (id: string, active: boolean) => Promise<void>
 }) {
   return <main className="organizer-view">
-    <header className="organizer-header"><div><a href="#/" className="back-link"><ChevronLeft />Projector view</a><p className="eyebrow">Organizer control</p><h1>{state.session.name}</h1></div><StatusPill status={status} storageKind={storageKind} /></header>
+    <header className="organizer-header"><div><a href="#/" className="back-link"><ChevronLeft />Projector view</a><p className="eyebrow">Organizer control</p><h1>{state.session.name}</h1></div><div className="header-actions"><StatusPill status={status} storageKind={storageKind} /><ThemeToggle theme={theme} onToggle={onToggleTheme} /></div></header>
     <DaySwitcher activeDay={state.session.activeDay} summaries={state.daySummaries} onSelect={onSetDay} />
-    <div className="score-context-label">Cumulative scores through Day {state.session.activeDay}</div>
+    <div className="score-context-label">Current event totals · New entries will be tagged Day {state.session.activeDay}</div>
     <section className="mini-scoreboard">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section>
     <div className="organizer-grid"><ScoreForm state={state} onRecord={onRecord} onApplyTithe={onApplyTithe} /><aside className="organizer-side"><div className="control-card history-card"><div className="control-card-heading"><div><p className="eyebrow">Immutable ledger</p><h2>History by day</h2></div><History /></div><ActivityFeed events={state.events} limit={50} organizer groupedByDay daySummaries={state.daySummaries} activeDay={state.session.activeDay} onUndo={(event) => void onUndo(event)} /></div><ReasonManager reasons={state.reasons} onAdd={onAddReason} onSetActive={onSetReasonActive} /><DataTools state={state} onNewEvent={onNewEvent} onImport={onImport} /></aside></div>
   </main>

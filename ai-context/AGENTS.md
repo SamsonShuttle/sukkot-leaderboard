@@ -20,5 +20,5 @@ This folder is the durable handoff for AI agents and future development chats. R
 - Do not remove old columns or events during browser migrations. Existing installations must upgrade in place.
 - A hidden reason remains valid historical data; hiding only removes it from new dropdowns.
 - New dashboard dimensions should be added in typed analytics structures in `src/lib/analytics.ts`.
-- Keep dashboard summaries reconcilable with the selected day’s leaderboard score.
+- Keep dashboard summaries reconcilable with the complete active-event leaderboard score. The selected day only tags new ledger events.
 - Prefer small, testable pure functions for new score and analytics calculations.

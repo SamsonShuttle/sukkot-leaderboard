@@ -50,9 +50,15 @@ Colour must not be the only identifier. Continue to show names, rank labels, dis
 
 ## Layout
 
-The public view contains a dark title/status bar, event summary, three ranked house cards, compact point-story data, recent scoring, and a restrained footer. Desktop uses three columns. On phones, the leader remains expanded while second and third place become compact horizontal cards.
+The public view contains a dark title/status bar, event summary, three ranked house cards, compact point-story data, and a fixed horizontal recent-activity ticker. Desktop uses three columns. On phones, the leader remains expanded while second and third place become compact horizontal cards.
 
 The dashboard and organizer share the same parchment shell, dark-navy header, cream cards, gold rules, serif headings, and semantic house headers.
+
+## Light and dark modes
+
+Light mode is the default printed-parchment treatment described above. Dark mode is a dark-linen interpretation of the same system, not a separate sports-dashboard theme: near-navy canvas, navy surfaces, parchment text, antique-gold rules, muted botanical green, and unchanged semantic house banners.
+
+Every route exposes the same moon/sun toggle in its header. The choice is stored locally under `sukkot-color-theme`, is applied before React loads to prevent a theme flash, and synchronizes across open browser tabs. Dark-mode team scores use accessible light variants of each identity colour while Judah's light banner continues to use navy ink.
 
 ## Texture and restraint
 

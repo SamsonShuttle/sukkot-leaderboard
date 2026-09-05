@@ -24,6 +24,8 @@
 - `src/components/OrganizerView.tsx` — scoring control surface.
 - `src/components/ReasonManager.tsx` — persistent reason catalogue UI.
 - `src/components/ActivityFeed.tsx` — public activity and grouped organizer history.
+- `src/components/ActivityTicker.tsx` — fixed horizontal recent-activity strip shared by projector and dashboard.
+- `src/components/ThemeToggle.tsx` — persistent, cross-tab Light/Dark control.
 
 ## Routing
 
@@ -45,4 +47,3 @@ When adding more data points:
 6. Add unit tests that reconcile the new metric with ledger score behavior.
 
 Avoid embedding business calculations directly in JSX. Components should consume typed, derived metrics.
-

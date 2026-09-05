@@ -39,11 +39,11 @@ Key/value application settings. `active_session_id` points to the current scorin
 
 ## Score derivation
 
-`calculateScores()` walks ledger events and subtracts from sources/adds to destinations. No mutable score column exists. `calculateDaySummaries()` derives daily changes and cumulative closing scores. `calculateDailyTitheStatus()` derives eligible daily bases and detects an active prior Tithe.
+`calculateScores()` walks every active-session ledger event and subtracts from sources/adds to destinations. No mutable score column exists. The organizer's active day does not filter this current total. `calculateDaySummaries()` separately derives daily changes and cumulative closing scores. `calculateDailyTitheStatus()` uses the active recording day to derive eligible daily bases and detect an active prior Tithe.
 
 ## Dashboard derivation
 
-`src/lib/analytics.ts` is the typed analytics layer. It removes undone event pairs from effective analytics, scopes data through the active day, then derives per-team gross gained, gross lost, net movement, breakdowns by reason and event type, trip-level new/removed/moved totals, and recent noted events.
+`src/lib/analytics.ts` is the typed analytics layer. It removes undone event pairs from effective analytics and can scope through a requested day. Public and full-dashboard callers request all eight days so visuals always represent the complete active event. It derives per-team gross gained, gross lost, net movement, breakdowns by reason and event type, trip-level new/removed/moved totals, and recent noted events.
 
 Add future data dimensions to the immutable event schema and analytics types/functions. Avoid creating a parallel mutable reporting database unless scale demands it.
 
@@ -58,4 +58,3 @@ Migrations inspect SQLite schema with `PRAGMA table_info` before adding newer co
 ## Backup compatibility
 
 JSON backup contains teams, sessions, events, settings, and saved reasons. Import uses explicit column lists and defaults missing legacy `active_day`, `day_number`, and `reason` values safely. CSV includes day, reason, operator, note, and reversal identifiers.
-

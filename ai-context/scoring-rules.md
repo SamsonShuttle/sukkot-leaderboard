@@ -13,11 +13,11 @@ Direction is generic:
 - Transfer: source and destination.
 - Tithe and Atonement: Judah or Israel is the source and Levi is the destination.
 
-Negative team scores are allowed. Displayed scores for a selected day are cumulative from Day 1 through that day.
+Negative team scores are allowed. Current-score KPIs on the projector, dashboard, and organizer always include every event in the active scoring session, regardless of the selected recording day.
 
 ## Days
 
-There are exactly eight trip days. The organizer selects the active day. New actions and undo compensations are assigned to that active day. History is grouped by day and shows each team’s closing cumulative total after that day. Older databases are migrated with existing events assigned to Day 1.
+There are exactly eight trip days. The organizer selects the active day solely as an input attached to new actions and undo compensations. Switching it must not rewind the public view, analytics, or current-score KPIs. History is grouped by day and shows each team’s closing cumulative total after that day. Older databases are migrated with existing events assigned to Day 1.
 
 ## Undo
 
