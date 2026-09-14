@@ -2,7 +2,7 @@
 
 ## General ledger behavior
 
-Every scoring action creates an immutable event with a UUID, session, timestamp, trip day, event type, positive whole-number magnitude, optional source team, optional destination team, optional operator, optional saved reason snapshot, optional free-form note, and optional reversed-event reference.
+Every scoring or Atonement-inventory action creates an immutable event with a UUID, session, timestamp, trip day, event type, positive whole-number magnitude, optional source team, optional destination team, optional operator, optional saved reason snapshot, optional free-form note, optional typed inventory fields, and optional reversed-event reference.
 
 Direction is generic:
 
@@ -21,15 +21,17 @@ There are exactly eight trip days. The organizer selects the active day solely a
 
 ## Undo
 
-Undo never deletes the original event. It creates a new `undo` event with source and destination reversed and `reverses_event_id` pointing to the original. An event can only be undone once, and undo events cannot themselves be undone.
+Undo never deletes the original event. It creates a new `undo` event with source and destination reversed and `reverses_event_id` pointing to the event it compensates. Each event can only receive one direct compensation, so repeated undo/restore actions form a single alternating chain. Odd chain depth leaves the root action undone; even depth restores it.
 
-Analytics exclude an undone original together with its compensation so dashboard gross totals describe the currently effective scoreboard. The immutable history still shows both records.
+Analytics exclude an undone original together with its compensation so dashboard gross totals describe the currently effective scoreboard. Both records remain in the immutable ledger and exports; the organizer folds the compensation into the original row, striking through the original action and showing when it was undone.
 
 ## Persistent award/deduction reasons
 
 Organizers add reasons directly from the Saved reason selector. New reasons are created as `both`, so the same concise catalogue appears for awards and deductions. Legacy saved reasons retain their prior applicability/status safely; active reasons appear in the scoring dropdown.
 
 The selected reason label is copied onto each event as an immutable snapshot. A later catalogue status change therefore does not rewrite history. Free-form notes remain separate from the saved reason.
+
+If an event was recorded without a useful reason, the organizer can add or replace its displayed reason later from the ledger. This creates an append-only event-reason annotation rather than mutating the score event; the latest annotation is used in derived breakdowns and exports while the original row remains unchanged.
 
 ## Atonement
 
@@ -38,8 +40,19 @@ Atonement is a consequence for poor behaviour or missed duties. It always transf
 - Turtle Dove — 2 points
 - Ram — 3 points
 - Ox — 4 points
+- 10% Tithe — 10% of the selected house’s current score, rounded to the nearest whole point. This is a one-off Atonement transfer and is separate from the day-based Daily Tithe.
 
 The selected offering is saved as the event reason. The organizer UI provides a prominent optional “Names / behaviour reason” note field for who was involved and what happened.
+
+### Found-offering currency
+
+Turtle Doves, Rams, Oxen, and 10% Tithes can also be found around camp and added to Judah or Israel as a second currency. Levi never finds or spends inventory: Levi receives Atonements from the other two houses. Each acquisition is an immutable `atonement_acquire` ledger event. Judah and Israel's public team cards show one image per Atonement type plus ready/found counts rather than repeating the image for every copy. The image remains in full colour while at least one copy is ready and turns greyscale when every found copy has been spent.
+
+When Judah or Israel receives a matching Atonement consequence, the oldest available token is used automatically. The token is marked spent, the source house loses no points, and Levi still gains the offering's value. For a 10% Tithe token, that value is calculated from the house's current score at the moment it is used. If no matching token is available, the normal Judah/Israel-to-Levi point transfer applies.
+
+Undoing a token-funded Atonement removes Levi's awarded points and makes the token available again. A found token cannot be undone while it is spent; first undo the Atonement that spent it. These are compensating events only—neither acquisition nor use mutates historical ledger rows.
+
+Levi's Atonement component shows effective receipt counts for Turtle Doves, Rams, Oxen, and the one-off 10% Tithe Atonement received from Judah and Israel. It counts both token-funded and point-funded offerings and removes undone Atonements from the displayed totals.
 
 ## Daily Tithe
 

@@ -58,7 +58,17 @@ async function saveBytes(bytes: Uint8Array): Promise<void> {
 class BrowserSqliteAdapter implements DatabaseAdapter {
   readonly kind = 'browser-sqlite' as const
 
-  constructor(private database: SqlJsDatabase, private readonly SQL: SqlJsStatic) {}
+  constructor(private database: SqlJsDatabase, private readonly SQL: SqlJsStatic) {
+    this.exposeForDevtools()
+  }
+
+  private exposeForDevtools() {
+    // SQLite Explorer needs a page-global sql.js Database. Restrict this to
+    // localhost so a deployed build never publishes the live database object.
+    if (!['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) return
+    window.db = this.database
+    window.sukkotDb = this.database
+  }
 
   private async persist() {
     await saveBytes(this.database.export())
@@ -95,6 +105,7 @@ class BrowserSqliteAdapter implements DatabaseAdapter {
     if (!bytes) return
     this.database.close()
     this.database = new this.SQL.Database(bytes)
+    this.exposeForDevtools()
   }
 
   async exportBytes() {
@@ -180,7 +191,10 @@ export async function migrateDatabase(database: DatabaseAdapter) {
       note TEXT,
       reverses_event_id TEXT REFERENCES score_events(id),
       day_number INTEGER NOT NULL DEFAULT 1 CHECK(day_number BETWEEN 1 AND 8),
-      reason TEXT
+      reason TEXT,
+      atonement_offering TEXT,
+      inventory_team TEXT REFERENCES teams(id),
+      inventory_delta INTEGER NOT NULL DEFAULT 0 CHECK(inventory_delta BETWEEN -1 AND 1)
     )`,
     `CREATE UNIQUE INDEX IF NOT EXISTS one_undo_per_event
       ON score_events(reverses_event_id) WHERE reverses_event_id IS NOT NULL`,
@@ -197,6 +211,23 @@ export async function migrateDatabase(database: DatabaseAdapter) {
       active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0, 1)),
       created_at TEXT NOT NULL
     )`,
+    `CREATE TABLE IF NOT EXISTS score_event_reason_annotations (
+      id TEXT PRIMARY KEY,
+      event_id TEXT NOT NULL REFERENCES score_events(id),
+      reason TEXT NOT NULL,
+      operator TEXT,
+      created_at TEXT NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS annotations_by_event_time
+      ON score_event_reason_annotations(event_id, created_at DESC)`,
+    `CREATE TABLE IF NOT EXISTS certificates (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      winner TEXT,
+      citation TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`,
   ]
   for (const sql of statements) await database.execute(sql)
 
@@ -212,5 +243,14 @@ export async function migrateDatabase(database: DatabaseAdapter) {
   }
   if (!eventColumns.some((column) => column.name === 'reason')) {
     await database.execute('ALTER TABLE score_events ADD COLUMN reason TEXT')
+  }
+  if (!eventColumns.some((column) => column.name === 'atonement_offering')) {
+    await database.execute('ALTER TABLE score_events ADD COLUMN atonement_offering TEXT')
+  }
+  if (!eventColumns.some((column) => column.name === 'inventory_team')) {
+    await database.execute('ALTER TABLE score_events ADD COLUMN inventory_team TEXT REFERENCES teams(id)')
+  }
+  if (!eventColumns.some((column) => column.name === 'inventory_delta')) {
+    await database.execute('ALTER TABLE score_events ADD COLUMN inventory_delta INTEGER NOT NULL DEFAULT 0 CHECK(inventory_delta BETWEEN -1 AND 1)')
   }
 }

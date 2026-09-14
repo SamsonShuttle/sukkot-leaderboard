@@ -10,9 +10,9 @@ public/assets/
 │   ├── sukkot-mark.svg
 │   └── almond-house-mark.svg
 ├── houses/
-    ├── judah-banner.png
-    ├── israel-banner.png
-    └── levi-banner.png
+    ├── Lion.png
+    ├── Menorah.png
+    └── Preists.png
 └── wheel/
     ├── tithe-10.svg
     ├── turtle-dove.svg
@@ -22,8 +22,10 @@ public/assets/
     └── spin-again.svg
 ```
 
-SVG, PNG, and WebP are suitable. Prefer wide house artwork around a 2:1 aspect ratio with the important crest centered. House names are rendered separately by the interface, so replacement artwork does not need to include text.
+SVG, PNG, and WebP are suitable. Keep the important icon centred; the current house cutouts are displayed with `object-fit: contain` in the projector's semantic-colour header. House names are rendered separately by the interface, so replacement artwork does not need to include text.
 
 Do not delete the current files in `public/banners/` until replacements have been checked in both light and dark modes at desktop and mobile sizes.
 
-The wheel filenames are reserved for future outcome artwork; see `public/assets/wheel/README.md`. Keep the existing number/percentage callouts visible when imagery is wired in so the result remains readable and accessible at a distance.
+The supplied wheel artwork is wired at runtime from the central configuration: `tithe-10-percent.png`, `two-turtle-doves.png`, `three-rams.png`, and `four-oxen.png`. Keep the existing number/percentage callouts visible when imagery is shown so the result remains readable and accessible at a distance.
+
+The active house artwork is `Lion.png`, `Menorah.png`, and `Preists.png`. The existing tall banner PNGs are retained as source artwork but are not used by the live interface.

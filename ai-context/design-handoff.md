@@ -34,6 +34,7 @@ These exist as CSS custom properties in `src/styles.css` and Tailwind v3 aliases
 - Israel: royal blue header, antique-gold accents/rank, white text, pale-blue tint, Menorah/banner motif.
 - Judah: parchment header, dark-gold accent/rank, deep-navy text (never white), warm-gold tint, Lion/banner motif.
 - Levi: crimson/wine header, antique-gold accents/rank, white text, pale-rose tint, priestly-service/banner motif.
+- The public projector keeps the explicit house label, name, and motif beneath the house-colour header. Supplied cutout house icons are contained in that header, while a restrained, reduced-motion-safe shine highlights only the current leader's coloured header. The shine supports the artwork and must never obscure the rank or score.
 
 Colour must not be the only identifier. Continue to show names, rank labels, distinct offline banner artwork, and motif text/shapes.
 
@@ -45,7 +46,7 @@ Colour must not be the only identifier. Continue to show names, rank labels, dis
 - Uppercase is reserved for small labels with restrained tracking.
 - Buttons have minimum 44 by 44 pixel targets and a visible 3-pixel gold focus ring.
 - Primary buttons use navy/white with gold active or hover treatment. Secondary buttons use surface/ink with a gold border.
-- The current leader uses a subtle gold double rule plus crown and explicit “1st place” text, not a glow.
+- The current leader uses a subtle gold double rule plus a crown; second and third use compact `#2` and `#3` badges.
 - Point activity rows retain activity, signed effect, house identity, and time. Positive status green never replaces house colour.
 
 ## Layout

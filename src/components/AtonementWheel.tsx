@@ -57,7 +57,7 @@ export function AtonementWheel({ weights }: { weights: WheelWeights }) {
   }
 
   return <>
-    <button className="wheel-launcher" type="button" onClick={() => setOpen(true)} aria-haspopup="dialog"><Sparkles /><span>Spin the wheel</span></button>
+    <button className="icon-button wheel-launcher" type="button" onClick={() => setOpen(true)} title="Spin the wheel" aria-label="Spin the wheel" aria-haspopup="dialog"><Sparkles /><span>Spin the wheel</span></button>
     <AnimatePresence>
       {open ? <motion.section className="wheel-overlay" role="dialog" aria-modal="true" aria-label="Atonement decision wheel" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
         <motion.div className="wheel-dialog" data-result={result?.id ?? ''} initial={{ scale: .94, y: 24 }} animate={{ scale: 1, y: 0 }} exit={{ scale: .94, y: 24 }}>
@@ -71,14 +71,14 @@ export function AtonementWheel({ weights }: { weights: WheelWeights }) {
             <i className="wheel-pointer" aria-hidden="true" />
             <div className={`wheel-fx ${phase}`} aria-hidden="true"><span className="friction-ring ring-one" /><span className="friction-ring ring-two" />{Array.from({ length: 18 }, (_, index) => <i className="wheel-spark" key={index} style={{ '--spark-angle': `${index * 20}deg`, '--spark-delay': `${-(index % 7) * .11}s`, '--spark-size': `${3 + index % 4}px` } as React.CSSProperties} />)}</div>
             <motion.div className="wheel-disc" data-tickets={tickets.map((ticket) => ticket.outcome.id).join(',')} style={{ background, rotate: rotation }}>
-              {tickets.map((ticket, index) => <span className="wheel-ticket-label" key={ticket.id} style={{ '--ticket-angle': `${index * sliceSize + sliceSize / 2 - 90}deg`, color: WHEEL_LABEL_COLOURS[ticket.outcome.id], fontSize: `${calloutSize}px` } as React.CSSProperties}>{ticket.outcome.callout}</span>)}
+              {tickets.map((ticket, index) => <span className="wheel-ticket-label" key={ticket.id} style={{ '--ticket-angle': `${index * sliceSize + sliceSize / 2 - 90}deg`, color: WHEEL_LABEL_COLOURS[ticket.outcome.id], fontSize: `${calloutSize}px` } as React.CSSProperties}>{ticket.outcome.imageUrl ? <img className="wheel-ticket-art" src={ticket.outcome.imageUrl} alt="" /> : null}<strong>{ticket.outcome.callout}</strong></span>)}
               <b>✦</b>
             </motion.div>
           </div>
           <div className="wheel-result" aria-live="polite">
             <AnimatePresence mode="wait">
               <motion.div className={result && phase === 'idle' ? 'result-callout' : 'result-status'} key={phase === 'idle' && result ? result.id : phase} initial={{ opacity: 0, scale: result ? .35 : .92, rotate: result ? -5 : 0 }} animate={{ opacity: 1, scale: result ? [1, 1.16, 1] : 1, rotate: 0 }} exit={{ opacity: 0, scale: .85 }} transition={{ duration: result ? .7 : .2, ease: 'easeOut' }}>
-                {phase === 'spinning' ? <span>Spinning—press Stop when ready.</span> : phase === 'stopping' ? <span>Coming to a stop…</span> : result ? <><strong style={{ color: WHEEL_COLOURS[result.id] }}>{result.label}</strong><span>{result.detail}</span></> : <span>Ready when you are.</span>}
+                {phase === 'spinning' ? <span>Spinning—press Stop when ready.</span> : phase === 'stopping' ? <span>Coming to a stop…</span> : result ? <>{result.imageUrl ? <img className="wheel-result-art" src={result.imageUrl} alt="" /> : null}<strong style={{ color: WHEEL_COLOURS[result.id] }}>{result.label}</strong><span>{result.detail}</span></> : <span>Ready when you are.</span>}
               </motion.div>
             </AnimatePresence>
           </div>

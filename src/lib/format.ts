@@ -10,7 +10,10 @@ export function eventLabel(event: ScoreEvent) {
     case 'deduct': return `${source} lost ${event.points}`
     case 'transfer': return `${event.points} transferred ${source} → ${destination}`
     case 'tithe': return `${event.reason ?? 'Daily tithe'}: ${event.points} from ${source} → Levi`
-    case 'atonement': return `${event.reason ?? 'Atonement'}: ${event.points} from ${source} → Levi`
+    case 'atonement': return event.inventoryDelta === -1 && event.inventoryTeam
+      ? `${teamById(event.inventoryTeam)?.shortName} offered an owned ${event.reason ?? 'Atonement'} · Levi gained ${event.points}`
+      : `${event.reason ?? 'Atonement'}: ${event.points} from ${source} → Levi`
+    case 'atonement_acquire': return `${teamById(event.inventoryTeam)?.shortName} found ${event.reason ?? 'an Atonement offering'}`
     case 'undo': return event.note || `Reversed ${event.points} points`
   }
 }
@@ -25,9 +28,9 @@ export function scoreDeltaFor(event: ScoreEvent, teamId: TeamId) {
 
 export function eventsToCsv(events: ScoreEvent[]) {
   const escape = (value: string | number | null) => `"${String(value ?? '').replaceAll('"', '""')}"`
-  const headers = ['id', 'day', 'timestamp', 'event_type', 'points', 'source_team', 'destination_team', 'reason', 'operator', 'note', 'reverses_event_id']
+  const headers = ['id', 'day', 'timestamp', 'event_type', 'points', 'source_team', 'destination_team', 'reason', 'atonement_offering', 'inventory_team', 'inventory_delta', 'operator', 'note', 'reverses_event_id']
   const rows = events.map((event) => [event.id, event.day, event.createdAt, event.type, event.points, event.sourceTeam,
-    event.destinationTeam, event.reason, event.operator, event.note, event.reversesEventId].map(escape).join(','))
+    event.destinationTeam, event.reason, event.atonementOffering, event.inventoryTeam, event.inventoryDelta, event.operator, event.note, event.reversesEventId].map(escape).join(','))
   return [headers.join(','), ...rows].join('\n')
 }
 

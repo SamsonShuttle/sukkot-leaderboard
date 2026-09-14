@@ -1,5 +1,5 @@
-import { ArrowLeft, BarChart3, Settings2, TrendingUp } from 'lucide-react'
-import { buildDashboardAnalytics, type DashboardAnalytics } from '../lib/analytics'
+import { ArrowLeft, Award, BarChart3, Settings2, TrendingUp } from 'lucide-react'
+import { buildDashboardAnalytics, scoreChartSummaries, type DashboardAnalytics } from '../lib/analytics'
 import type { ColorTheme, DaySummary, ScoreboardState, Team, TeamId } from '../types'
 import { TEAM_IDS, teamById } from '../types'
 import { ActivityTicker } from './ActivityTicker'
@@ -13,17 +13,18 @@ const LINE_COLORS: Record<TeamId, string> = {
 }
 
 function ScoreLineChart({ summaries }: { summaries: DaySummary[] }) {
+  const plotted = scoreChartSummaries(summaries)
   const width = 820
   const height = 238
   const inset = { top: 18, right: 18, bottom: 32, left: 46 }
-  const values = summaries.flatMap((summary) => TEAM_IDS.map((teamId) => summary.closingScores[teamId]))
+  const values = plotted.flatMap((summary) => TEAM_IDS.map((teamId) => summary.closingScores[teamId]))
   const observedMinimum = Math.min(0, ...values)
   const observedMaximum = Math.max(0, ...values)
   const flat = observedMinimum === observedMaximum
   const minimum = flat ? observedMinimum - 5 : observedMinimum
   const maximum = flat ? observedMaximum + 5 : observedMaximum
   const range = Math.max(10, maximum - minimum)
-  const x = (index: number) => inset.left + index * ((width - inset.left - inset.right) / Math.max(1, summaries.length - 1))
+  const x = (index: number) => inset.left + index * ((width - inset.left - inset.right) / Math.max(1, plotted.length - 1))
   const y = (value: number) => inset.top + (maximum - value) / range * (height - inset.top - inset.bottom)
   const gridValues = Array.from({ length: 5 }, (_, index) => Math.round(maximum - range * index / 4))
 
@@ -32,21 +33,21 @@ function ScoreLineChart({ summaries }: { summaries: DaySummary[] }) {
       <header><div><span>Score movement</span><h2>Points over time</h2></div><TrendingUp /></header>
       <div className="line-chart-wrap">
         <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="score-chart-title score-chart-description">
-          <title id="score-chart-title">House scores over all eight days</title>
-          <desc id="score-chart-description">A line for Judah, Israel, and Levi showing cumulative points after each event day.</desc>
+          <title id="score-chart-title">House scores through the latest recorded day</title>
+          <desc id="score-chart-description">A line for Judah, Israel, and Levi showing cumulative points after each day up to the latest day with recorded data.</desc>
           {gridValues.map((value, index) => (
             <g className="chart-gridline" key={index}>
               <line x1={inset.left} x2={width - inset.right} y1={y(value)} y2={y(value)} />
               <text x={inset.left - 8} y={y(value) + 4}>{value}</text>
             </g>
           ))}
-          {summaries.map((summary, index) => <text className="chart-day-label" key={summary.day} x={x(index)} y={height - 7}>D{summary.day}</text>)}
+          {plotted.map((summary, index) => <text className="chart-day-label" key={summary.day} x={x(index)} y={height - 7}>D{summary.day}</text>)}
           {TEAM_IDS.map((teamId) => {
-            const path = summaries.map((summary, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(summary.closingScores[teamId])}`).join(' ')
+            const path = plotted.map((summary, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(summary.closingScores[teamId])}`).join(' ')
             return (
               <g className={`chart-series series-${teamId}`} key={teamId}>
                 <path d={path} stroke={LINE_COLORS[teamId]} />
-                {summaries.map((summary, index) => <circle key={summary.day} cx={x(index)} cy={y(summary.closingScores[teamId])} r="4" fill={LINE_COLORS[teamId]} />)}
+                {plotted.map((summary, index) => <circle key={summary.day} cx={x(index)} cy={y(summary.closingScores[teamId])} r="4" fill={LINE_COLORS[teamId]} />)}
               </g>
             )
           })}
@@ -120,7 +121,7 @@ export function DataDashboard({ state, status, storageKind, theme, onToggleTheme
     <main className="data-dashboard-view compact-dashboard">
       <header className="dashboard-header">
         <div className="dashboard-title"><a href="#/"><ArrowLeft />Leaderboard</a><p>Whole-event data · Scoring on Day {state.session.activeDay}</p><h1>{state.session.name}</h1></div>
-        <div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><a className="icon-button" href="#/organizer" title="Organizer controls" aria-label="Organizer controls"><Settings2 /></a></div>
+        <div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><a className="icon-button" href="#/certificates" title="Open certificates" aria-label="Open certificates"><Award /></a><a className="icon-button" href="#/organizer" title="Organizer controls" aria-label="Organizer controls"><Settings2 /></a></div>
       </header>
 
       <div className="dashboard-visual-grid">

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AlertTriangle, LoaderCircle } from 'lucide-react'
 import { ScoreLedger } from './data/ledger'
-import type { ColorTheme, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelWeights } from './types'
+import type { AddAtonementInput, ApplyAtonementInput, ColorTheme, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelWeights } from './types'
 import { TEAMS } from './types'
 import { PublicLeaderboard } from './components/PublicLeaderboard'
 import { OrganizerView } from './components/OrganizerView'
 import { DataDashboard } from './components/DataDashboard'
+import { CertificatesView } from './components/CertificatesView'
 
 let openLedgerPromise: Promise<ScoreLedger> | undefined
 const openLedger = () => openLedgerPromise ??= ScoreLedger.open()
@@ -38,6 +39,13 @@ const emptyState: ScoreboardState = {
   reasons: [],
   titheStatus: { day: 1, bases: { judah: 0, israel: 0 }, appliedRate: null },
   wheelWeights: { 'tithe-10': 2, 'turtle-dove': 3, ram: 2, ox: 1, 'free-pass': 2, 'spin-again': 1 },
+  atonementInventory: {
+    judah: { 'turtle-dove': [], ram: [], ox: [], 'tithe-10': [] },
+    israel: { 'turtle-dove': [], ram: [], ox: [], 'tithe-10': [] },
+    levi: { 'turtle-dove': [], ram: [], ox: [], 'tithe-10': [] },
+  },
+  atonementReceipts: { 'turtle-dove': 0, ram: 0, ox: 0, 'tithe-10': 0 },
+  certificates: [],
 }
 
 export default function App() {
@@ -128,7 +136,11 @@ export default function App() {
   const importBackup = async (backup: unknown) => { await ledger.importBackup(backup); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
   const setActiveDay = async (day: TripDay) => { await ledger.setActiveDay(day); await refresh(ledger); setLatestEvent(undefined); updates?.postMessage({ type: 'scores-changed' }) }
   const addReason = async (label: string) => { await ledger.addReason(label); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
+  const addEventReason = async (eventId: string, reason: string) => { await ledger.addEventReason(eventId, reason, localStorage.getItem('sukkot-operator') ?? undefined); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
   const setWheelWeights = async (weights: WheelWeights) => { await ledger.setWheelWeights(weights); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
+  const addCertificate = async (title: string, winner?: string, citation?: string) => { await ledger.addCertificate(title, winner, citation); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
+  const updateCertificate = async (id: string, title: string, winner?: string, citation?: string) => { await ledger.updateCertificate(id, title, winner, citation); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
+  const deleteCertificate = async (id: string) => { await ledger.deleteCertificate(id); await refresh(ledger); updates?.postMessage({ type: 'scores-changed' }) }
   const applyDailyTithe = async (rate: TitheRate, operator?: string, note?: string) => {
     const events = await ledger.applyDailyTithe(rate, operator, note)
     await refresh(ledger)
@@ -136,11 +148,27 @@ export default function App() {
     setLatestEvent(event)
     updates?.postMessage({ type: 'scores-changed', event })
   }
+  const addAtonement = async (input: AddAtonementInput) => {
+    const event = await ledger.addAtonement(input)
+    await refresh(ledger)
+    setLatestEvent(event)
+    updates?.postMessage({ type: 'scores-changed', event })
+    window.setTimeout(() => setLatestEvent((current) => current?.id === event.id ? undefined : current), 3400)
+  }
+  const applyAtonement = async (input: ApplyAtonementInput) => {
+    const event = await ledger.applyAtonement(input)
+    await refresh(ledger)
+    setLatestEvent(event)
+    updates?.postMessage({ type: 'scores-changed', event })
+    window.setTimeout(() => setLatestEvent((current) => current?.id === event.id ? undefined : current), 3400)
+  }
   const organizer = route.startsWith('#/organizer')
   const dashboard = route.startsWith('#/dashboard')
+  const certificates = route.startsWith('#/certificates')
   const toggleTheme = () => setTheme((current) => current === 'light' ? 'dark' : 'light')
 
-  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onUndo={undo} onNewEvent={newEvent} onExportBackup={exportBackup} onExportDatabase={exportDatabase} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onSetWheelWeights={setWheelWeights} />
+  if (organizer) return <OrganizerView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onRecord={record} onApplyTithe={applyDailyTithe} onApplyAtonement={applyAtonement} onAddAtonement={addAtonement} onUndo={undo} onNewEvent={newEvent} onExportBackup={exportBackup} onExportDatabase={exportDatabase} onImport={importBackup} onSetDay={setActiveDay} onAddReason={addReason} onAddEventReason={addEventReason} onSetWheelWeights={setWheelWeights} />
   if (dashboard) return <DataDashboard state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} />
+  if (certificates) return <CertificatesView state={state} status={status} storageKind={ledger.storageKind} theme={theme} onToggleTheme={toggleTheme} onAdd={addCertificate} onUpdate={updateCertificate} onDelete={deleteCertificate} admin={route.startsWith('#/certificates-admin')} />
   return <PublicLeaderboard state={state} status={status} storageKind={ledger.storageKind} latestEvent={latestEvent} theme={theme} onToggleTheme={toggleTheme} />
 }

@@ -5,6 +5,10 @@ export type TripDay = (typeof TRIP_DAYS)[number]
 export type ReasonAppliesTo = 'add' | 'deduct' | 'both'
 export type TitheRate = 5 | 10
 export type ColorTheme = 'light' | 'dark'
+export const ATONEMENT_OFFERING_IDS = ['turtle-dove', 'ram', 'ox', 'tithe-10'] as const
+export type AtonementOfferingId = (typeof ATONEMENT_OFFERING_IDS)[number]
+export type AtonementOptionId = AtonementOfferingId
+export type AtonementReceiptId = AtonementOptionId
 export type WheelOutcomeId = 'tithe-10' | 'turtle-dove' | 'ram' | 'ox' | 'free-pass' | 'spin-again'
 export type WheelWeights = Record<WheelOutcomeId, number>
 
@@ -15,6 +19,7 @@ export type EventType =
   | 'transfer'
   | 'tithe'
   | 'atonement'
+  | 'atonement_acquire'
   | 'undo'
 
 export interface Team {
@@ -42,13 +47,35 @@ export interface ScoreEvent {
   reversesEventId: string | null
   day: TripDay
   reason: string | null
+  atonementOffering: AtonementOfferingId | null
+  inventoryTeam: TeamId | null
+  inventoryDelta: -1 | 0 | 1
 }
+
+export interface AtonementToken {
+  acquisitionEventId: string
+  offeringId: AtonementOfferingId
+  acquiredAt: string
+  consumedByEventId: string | null
+  consumedAt: string | null
+}
+
+export type AtonementInventory = Record<TeamId, Record<AtonementOfferingId, AtonementToken[]>>
+export type AtonementReceipts = Record<AtonementReceiptId, number>
 
 export interface ScoreReason {
   id: string
   label: string
   appliesTo: ReasonAppliesTo
   active: boolean
+  createdAt: string
+}
+
+export interface ScoreEventReasonAnnotation {
+  id: string
+  eventId: string
+  reason: string
+  operator: string | null
   createdAt: string
 }
 
@@ -81,10 +108,22 @@ export interface ScoreboardState {
   reasons: ScoreReason[]
   titheStatus: DailyTitheStatus
   wheelWeights: WheelWeights
+  atonementInventory: AtonementInventory
+  atonementReceipts: AtonementReceipts
+  certificates: Certificate[]
+}
+
+export interface Certificate {
+  id: string
+  title: string
+  winner: string | null
+  citation: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface NewScoreEvent {
-  type: Exclude<EventType, 'seed' | 'undo'>
+  type: Exclude<EventType, 'seed' | 'undo' | 'atonement_acquire'>
   points: number
   sourceTeam?: TeamId | null
   destinationTeam?: TeamId | null
@@ -93,12 +132,27 @@ export interface NewScoreEvent {
   reason?: string
 }
 
+export interface AddAtonementInput {
+  team: Exclude<TeamId, 'levi'>
+  offeringId: AtonementOfferingId
+  operator?: string
+  note?: string
+}
+
+export interface ApplyAtonementInput {
+  sourceTeam: Exclude<TeamId, 'levi'>
+  offeringId: AtonementOptionId
+  operator?: string
+  note?: string
+}
+
 export interface BackupData {
   version: 1
   exportedAt: string
   teams: Array<Record<string, unknown>>
   sessions: Array<Record<string, unknown>>
   events: Array<Record<string, unknown>>
+  reasonAnnotations?: Array<Record<string, unknown>>
   settings: Array<Record<string, unknown>>
   reasons?: Array<Record<string, unknown>>
 }
@@ -113,7 +167,7 @@ export const TEAMS: Team[] = [
     tint: '#FFF1CF',
     foreground: '#18233B',
     motif: 'Lion',
-    bannerUrl: '/banners/judah.svg',
+    bannerUrl: '/assets/houses/Lion.png',
   },
   {
     id: 'israel',
@@ -124,7 +178,7 @@ export const TEAMS: Team[] = [
     tint: '#DCE5FF',
     foreground: '#FFFFFF',
     motif: 'Menorah',
-    bannerUrl: '/banners/israel.svg',
+    bannerUrl: '/assets/houses/Menorah.png',
   },
   {
     id: 'levi',
@@ -135,7 +189,7 @@ export const TEAMS: Team[] = [
     tint: '#F7DCE4',
     foreground: '#FFFFFF',
     motif: 'Priestly service',
-    bannerUrl: '/banners/levi.svg',
+    bannerUrl: '/assets/houses/Preists.png',
   },
 ]
 

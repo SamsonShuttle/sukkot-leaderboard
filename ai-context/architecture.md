@@ -1,5 +1,7 @@
 # Architecture
 
+Certificate routes use `src/components/CertificatesView.tsx`; `#/certificates` is the public reveal gallery and `#/certificates-admin` is the local management studio.
+
 ## Stack
 
 - React 19 + Vite + strict TypeScript
@@ -19,11 +21,13 @@
 - `src/config.ts` — configurable UI/scoring defaults, including Atonement offerings and Tithe rates.
 - `src/lib/analytics.ts` — pure extensible dashboard model.
 - `src/components/PublicLeaderboard.tsx` — default projector route.
+- `src/components/TeamCard.tsx` — ranked house score card and derived Atonement wallet.
 - `src/components/ProjectorInsights.tsx` — compact default-view analytics element.
 - `src/components/DataDashboard.tsx` — full data dashboard.
 - `src/components/OrganizerView.tsx` — scoring control surface.
 - `src/components/ActivityFeed.tsx` — public activity and grouped organizer history.
 - `src/components/ActivityTicker.tsx` — fixed horizontal recent-activity strip shared by projector and dashboard.
+- `src/lib/eventChains.ts` — pure grouping and effective-root derivation for append-only undo/restore chains.
 - `src/components/ThemeToggle.tsx` — persistent, cross-tab Light/Dark control.
 - `src/components/AtonementWheel.tsx` — weighted, non-scoring projector wheel; its odds are loaded from the SQLite-backed `settings` table.
 
@@ -48,4 +52,8 @@ When adding more data points:
 
 Avoid embedding business calculations directly in JSX. Components should consume typed, derived metrics.
 
+Found Atonement offerings, including the 10% Tithe, use the existing append-only `score_events` stream with typed inventory fields. `ScoreLedger.addAtonement()` records acquisition for Judah or Israel; `ScoreLedger.applyAtonement()` automatically spends a matching available token or falls back to the normal point transfer. For a Tithe token, the point value is calculated from the current house score when spent. `calculateAtonementReceipts()` separately derives Levi's effective receipt totals. `eventChains.ts` groups any repeated undo/restore compensation chain back to one root action for display and non-score derivations. This keeps browser and Tauri persistence on one migration path and makes score plus inventory undo behavior auditable.
+
 Organizer data tools call typed ledger methods directly rather than dispatching a custom window event. Browser downloads attach a temporary anchor to the document and defer object-URL revocation for WebKit compatibility. The database adapter exposes read-only byte export in the browser; native builds use their existing on-disk file.
+
+The localhost browser build exposes the live `sql.js` object as `window.db` (and `window.sukkotDb`) for SQLite Explorer DevTools inspection. This debug hook is restricted by hostname and does not replace IndexedDB persistence or appear in Tauri.

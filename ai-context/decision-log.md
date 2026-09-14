@@ -1,5 +1,9 @@
 # Decision log
 
+## Certificate awards
+
+Certificates are stored in a separate local SQLite table and are not currently derived from or linked to score points. Winners may remain blank until awards night.
+
 ## Implemented decisions
 
 - Browser development uses actual SQLite compiled to WebAssembly, with database bytes in IndexedDB, rather than localStorage score counters.
@@ -10,11 +14,13 @@
 - Selecting a day chooses where new events and undo compensations are recorded; it does not filter current scores or public analytics.
 - Saved reason labels are snapshotted onto events so later hiding/restoring a catalogue option cannot alter history.
 - Atonement offerings are fixed product values: Turtle Dove 2, Ram 3, Ox 4.
+- Atonement also offers a separate 10% Tithe option. It transfers 10% of the selected house’s current score, rounded to the nearest whole point; it does not use or mark the active day’s Daily Tithe status.
 - Daily Tithe is a batch UI action represented by separate immutable source-team events so each transfer remains auditable.
 - “That day’s points” for Tithe means positive net points earned on that day before Tithe, excluding seeds. This avoids re-tithing previous days’ cumulative balances.
 - Tithe results round independently per house to the nearest integer.
 - The dashboard uses effective events (undone pairs removed) for understandable gross analytics, while the ledger continues to expose every record.
-- The normal projector includes compact analytics; the expanded dashboard is a separate hash route for a denser data story.
+- The normal projector includes a selected-day per-house Point story ordered exactly like the ranked team cards; each story lists effective gained and deducted reasons instead of repeating the current whole-event total. The expanded dashboard remains a separate hash route for a denser data story.
+- The Point story omits its title row and uses a small dashboard icon link overlapping the panel's top-right border to preserve space for the breakdown data.
 - The 2026 printed-material design handoff supersedes the initial dark sports-dashboard palette. All routes now share a parchment/navy/gold noticeboard shell.
 - House presentation is resolved from the semantic team map: Israel royal blue, Judah parchment gold with navy foreground, and Levi crimson/wine.
 - Projector mobile layout keeps the leader expanded and renders the other houses as compact cards.
@@ -24,14 +30,19 @@
 - Active day is now a recording input only. This supersedes the earlier decision that day selection also filtered public/current scores; all current KPIs and analytics cover the complete event.
 - The projector and dashboard use a fixed horizontal activity ticker to keep recent changes visible without consuming a vertical panel.
 - The dashboard's generic top KPI cards and separate day-total panel were replaced by a score-over-time line chart, per-house award-source bars, and gained-versus-taken donut charts.
+- The dashboard line chart domain ends at the last day with ledger events. Empty days before that day remain on the axis so the series stays continuous; later unused days are omitted instead of repeating a flat closing score through Day 8.
 - Current placeholder SVG banners no longer embed house names, preventing duplicate labels when the interface renders the house name.
 - Future supplied artwork has a documented offline drop zone under `public/assets/`.
 - The organizer permits natural document scrolling on smaller laptop displays rather than clipping controls; its header prioritizes the three current-score KPIs over an event title.
 - New saved reasons are always available to both awards and deductions and are created inline from the score desk selector. Legacy reason rows retain their original database shape for backup compatibility.
+- Historical score rows can receive a saved or newly created reason from the organizer ledger. Late reason changes are append-only annotations resolved as the latest displayed reason, so original score events remain immutable.
 - Backup/import/reset and wheel configuration are contained in the organizer's top-right settings popover, leaving the ledger to occupy the recovered layout space.
 - The organizer ledger is scoped to the active recording day only; full event history remains in JSON/CSV exports and can be viewed by changing the active day.
+- Undo compensations remain append-only records, but the organizer folds each undo/restore chain into its original visible ledger row: original text is struck through while undone, the latest compensation time is shown inline, and one action button targets the latest chain entry (labelled `Undo` or `Undo undo`) instead of rendering a growing list of standalone events.
+- Found-offering entry lives in an Add Atonement Score desk tab rather than a separate organizer card; the active-day ledger uses an independent scroll area so long histories do not lengthen the control desk. Its day group retains its natural content height, allowing the ledger viewport—not a clipped inner group—to scroll to every event.
 - The projector activity ticker duplicates its latest items into a continuous, pause-on-hover crawl.
 - The Atonement decision wheel is a non-scoring facilitation control. It uses persisted relative weights in `settings`, and any outcome must be manually recorded through the existing immutable score desk.
+- The projector's non-scoring wheel launcher lives in the header action group so it cannot cover the Point story or ticker.
 - Low-opacity Hebrew alphabet characters replace the isolated lower-right ornament as the shared parchment/linen background field; no external font is required.
 - Wheel selection is pointer-led: stopping first chooses one equal-sized weighted ticket, computes the exact rotation that centres that ticket beneath the fixed pointer, and announces that ticket only after deceleration completes.
 - Wheel outcome text lives in a six-colour legend above the graphic. Repeated weighted tickets reuse their outcome colour but are interleaved around the circle whenever the configured weights permit.
@@ -40,6 +51,13 @@
 - JSON/CSV downloads use an attached temporary link and delayed blob-URL cleanup so WebKit has time to begin reading the file. Data-tool failures are displayed inline instead of surfacing as unhandled async errors or blocking alerts.
 - Backup import must validate the complete backup and its active-session/event references before the destructive transaction begins. A failed validation leaves the existing database untouched.
 - Browser users can export the exact serialized SQLite bytes as a `.sqlite3` inspection snapshot. This is separate from the portable JSON backup and must not be edited and re-imported as application data.
+- The localhost Vite build exposes the live `sql.js` object as `window.db` for the SQLite Explorer DevTools extension. The hook is development-only; the persisted source of truth remains IndexedDB.
+- Supplied house crest PNGs are resolved from the central semantic team map and use `object-fit: contain` so the vertical artwork is never cropped. Supplied Tithe and Atonement artwork is centralized in scoring configuration, shown in the wheel while retaining numeric/text callouts, and repeated in offering selectors plus recorded-event cards without becoming ledger data.
+- The public projector restores explicit house labels, names, and motifs below the header. The supplied Lion, Menorah, and Priests-with-Ark cutout icons replace the previous banner artwork in the shared team map. The only ambient projector treatment is a restrained, reduced-motion-safe shine on the current leader's coloured header.
+- Found Turtle Doves, Rams, Oxen, and 10% Tithes are a team-level second currency derived from append-only score-ledger events, not mutable counters. A matching available token is consumed automatically before Judah or Israel loses points; Levi still receives the offering value as newly awarded points. The value of a Tithe token is 10% of the owning house's current score when used.
+- Each Atonement type uses one image on the owning team's public card; ready/found counts represent multiple copies without duplicating artwork. The image turns greyscale when all found copies are used. Undoing a spend makes a copy available again; a spent acquisition cannot be undone until its consuming Atonement is undone.
+- Levi is receipts-only for the Atonement currency. Found offerings can be assigned only to Judah or Israel; Levi's component derives and displays receipt totals from effective Atonement events, including both token-funded and point-funded payments.
+- Levi's receipt totals include the one-off 10% Tithe Atonement as a fourth category, and Judah or Israel may hold it as a findable inventory token.
 
 ## Product choices that may be revisited explicitly
 

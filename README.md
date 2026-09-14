@@ -21,7 +21,7 @@ Use the full-screen button in the projector header (or the browser's full-screen
 
 Use the moon/sun button in any header to switch between the default parchment **Light** mode and the matching dark-linen **Dark** mode. The preference persists locally and synchronizes across open tabs.
 
-The standard projector view includes a compact **Point story** strip, a slow continuously scrolling recent-activity ticker, and an optional **Spin the wheel** overlay for atonement calls. The wheel keeps spinning until Stop is pressed, shows a short callout inside every segment, adds restrained shake/spark effects while moving, then lands on and dramatically announces the same colour-coded result; organizers record any resulting points manually. Use **Full data dashboard** for cumulative score lines across all eight days, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
+The standard projector view includes a compact **Point story** strip, a slow continuously scrolling recent-activity ticker, and an optional **Spin the wheel** overlay for atonement calls. The wheel keeps spinning until Stop is pressed, shows a short callout inside every segment, adds restrained shake/spark effects while moving, then lands on and dramatically announces the same colour-coded result; organizers record any resulting points manually. Use **Full data dashboard** for cumulative score lines through the latest recorded day, award-source bars, and house gain/deduction rings. Dashboard figures always cover the whole event and exclude actions that have been undone; the complete immutable audit trail remains visible in organizer history.
 
 ## Commands
 
@@ -58,6 +58,8 @@ There is no SQLite server to connect to: SQLite is an embedded file/database eng
 - **Tauri app:** the SQL plugin stores `sukkot-leaderboard.db` under the app configuration directory. With the current bundle identifier, the macOS path is normally `~/Library/Application Support/org.sukkotcamp.leaderboard/sukkot-leaderboard.db`. Close the app or inspect a copied snapshot rather than editing the live file.
 
 JSON backup, history CSV, and browser SQLite exports show an inline success or error message. Imports are fully validated before the existing database is replaced, and the replacement remains one SQLite transaction.
+
+For live localhost debugging with the Chrome **SQLite Explorer** DevTools extension, open the app through Vite (`npm run dev`), reload the page once, open DevTools → **SQLite Explorer**, and enter `db` as the database variable name. The app exposes the live `sql.js` database as `window.db` only on localhost; deployed hosts and Tauri do not expose it. Use `sukkotDb` as an alternative variable name.
 
 ## Banners and customization
 

@@ -12,9 +12,11 @@ The three teams are fixed:
 
 ## Application surfaces
 
-- `#/` — compact public projector leaderboard with large current-event rankings, scores, offline animated banners, compact analytics, database status, full-screen control, navigation, an always-visible scrolling recent-activity strip, and a non-scoring Atonement decision wheel overlay.
+- `#/` — compact public projector leaderboard with large current-event rankings, scores, Judah/Israel Atonement wallets, Levi Atonement receipts, a selected-day Point story broken down by reason, offline animated banners, compact analytics, database status, full-screen control, navigation, an always-visible scrolling recent-activity strip, and a non-scoring Atonement decision wheel overlay.
 - `#/dashboard` — one-screen projector data dashboard led by visual analysis: a score-over-time line chart, per-team award-source bars, inflow/outflow donut charts, and the shared activity ticker.
-- `#/organizer` — compact control desk for active-day selection, scoring, Tithe, Atonement, inline saved-reason creation, active-day immutable history, and a top-right settings menu for backup/import, CSV export, reset, and wheel odds.
+- `#/organizer` — compact control desk for active-day selection, scoring, Tithe, Atonement, an Add Atonement tab for found-offering inventory entry, inline saved-reason creation and late reason annotation from historical ledger rows, active-day immutable history, and a top-right settings menu for backup/import, CSV export, reset, and wheel odds.
+- `#/certificates` — awards-night gallery of selectable certificates with an animated winner reveal.
+- `#/certificates-admin` — local certificate studio for adding, editing, and removing award titles, citations, and winners.
 
 No authentication is required in the first version. Route separation is intentional rather than a security boundary.
 
@@ -35,7 +37,7 @@ No authentication is required in the first version. Route separation is intentio
 - A warm parchment digital noticeboard derived from the 2026 printed event materials, with a dark-navy header and antique-gold framing.
 - Israel uses royal blue, Judah parchment gold with navy ink, and Levi crimson/wine. Antique gold unifies all three houses.
 - Serif display headings pair with accessible sans-serif controls and tabular score numerals.
-- Distinctive placeholder banners live in `public/banners/` and are designed for easy replacement.
-- Flag movement is CSS/SVG-based and offline.
+- Distinctive supplied house crests live in `public/assets/houses/` and are used across the projector, dashboard, and organizer.
+- House crest and wheel artwork is bundled for offline use.
 - Framer Motion drives brief count, celebration, and transfer animations with reduced-motion support.
 - `design-handoff.md` is authoritative for tokens, house treatment, responsive behavior, and accessibility.

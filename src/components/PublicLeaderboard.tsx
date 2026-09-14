@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, Maximize2, Settings2, TentTree } from 'lucide-react'
+import { Award, ChartNoAxesCombined, Maximize2, Settings2, TentTree } from 'lucide-react'
 import type { ColorTheme, ScoreboardState, ScoreEvent } from '../types'
 import { StatusPill } from './StatusPill'
 import { TeamCard } from './TeamCard'
@@ -38,7 +38,9 @@ export function PublicLeaderboard({ state, status, storageKind, latestEvent, the
         <div className="header-actions">
           <StatusPill status={status} storageKind={storageKind} compact />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <AtonementWheel weights={state.wheelWeights} />
           <a className="icon-button" href="#/dashboard" title="Open full data dashboard" aria-label="Open full data dashboard"><ChartNoAxesCombined /></a>
+          <a className="icon-button" href="#/certificates" title="Open certificates" aria-label="Open certificates"><Award /></a>
           <button className="icon-button" onClick={enterFullscreen} title="Enter fullscreen" aria-label="Enter fullscreen"><Maximize2 /></button>
           <a className="icon-button" href="#/organizer" title="Organizer controls" aria-label="Organizer controls"><Settings2 /></a>
         </div>
@@ -46,13 +48,12 @@ export function PublicLeaderboard({ state, status, storageKind, latestEvent, the
       <p className="sr-only" aria-live="polite">Current ranking: {ranked.map((team, index) => `${index + 1}, ${team.name}, ${state.scores[team.id]} points`).join('. ')}</p>
       <section className="leaderboard-grid">
         {ranked.map((team, index) => (
-          <TeamCard key={team.id} team={team} score={state.scores[team.id]} rank={index + 1} latestEvent={latestEvent} />
+          <TeamCard key={team.id} team={team} score={state.scores[team.id]} rank={index + 1} inventory={state.atonementInventory[team.id]} receipts={state.atonementReceipts} latestEvent={latestEvent} />
         ))}
       </section>
       <ProjectorInsights state={state} />
       <TransferMoment event={latestEvent} />
       <ActivityTicker events={state.events} />
-      <AtonementWheel weights={state.wheelWeights} />
     </main>
   )
 }
