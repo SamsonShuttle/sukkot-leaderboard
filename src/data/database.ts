@@ -8,11 +8,73 @@ export interface DatabaseAdapter {
   transaction(steps: Array<{ sql: string; params?: unknown[] }>): Promise<void>
   reload(): Promise<void>
   exportBytes(): Promise<Uint8Array | null>
+  close(): Promise<void>
 }
 
 const DB_KEY = 'sukkot-leaderboard-sqlite-v1'
 const IDB_NAME = 'sukkot-leaderboard-storage'
 const IDB_STORE = 'database'
+const CATALOG_KEY = 'sukkot-leaderboard-database-catalog-v1'
+const DEFAULT_DATABASE_ID = 'default'
+
+export interface DatabaseProfile {
+  id: string
+  name: string
+  createdAt: string
+}
+
+export interface DatabaseCatalog {
+  activeId: string
+  databases: DatabaseProfile[]
+}
+
+const defaultProfile = (): DatabaseProfile => ({ id: DEFAULT_DATABASE_ID, name: 'Sukkot Camp', createdAt: new Date().toISOString() })
+
+const databaseKey = (id: string) => id === DEFAULT_DATABASE_ID ? DB_KEY : `${DB_KEY}:${id}`
+const databaseFileName = (id: string) => id === DEFAULT_DATABASE_ID ? 'sukkot-leaderboard.db' : `sukkot-leaderboard-${id}.db`
+
+const validProfile = (value: unknown): value is DatabaseProfile => {
+  if (!value || typeof value !== 'object') return false
+  const profile = value as Record<string, unknown>
+  return typeof profile.id === 'string' && /^[a-z0-9-]+$/i.test(profile.id)
+    && typeof profile.name === 'string' && Boolean(profile.name.trim()) && profile.name.length <= 80
+    && typeof profile.createdAt === 'string'
+}
+
+export function getDatabaseCatalog(): DatabaseCatalog {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? 'null') as Partial<DatabaseCatalog> | null
+    const databases = parsed?.databases?.filter(validProfile) ?? []
+    if (!databases.length) return { activeId: DEFAULT_DATABASE_ID, databases: [defaultProfile()] }
+    const activeId = databases.some((database) => database.id === parsed?.activeId) ? String(parsed?.activeId) : databases[0].id
+    return { activeId, databases }
+  } catch {
+    return { activeId: DEFAULT_DATABASE_ID, databases: [defaultProfile()] }
+  }
+}
+
+function saveDatabaseCatalog(catalog: DatabaseCatalog) {
+  localStorage.setItem(CATALOG_KEY, JSON.stringify(catalog))
+}
+
+export function createDatabaseProfile(name: string): DatabaseCatalog {
+  const cleanName = name.trim()
+  if (!cleanName) throw new Error('Enter a database name')
+  if (cleanName.length > 80) throw new Error('Keep database names to 80 characters or fewer')
+  const catalog = getDatabaseCatalog()
+  const database: DatabaseProfile = { id: crypto.randomUUID(), name: cleanName, createdAt: new Date().toISOString() }
+  const next = { activeId: database.id, databases: [...catalog.databases, database] }
+  saveDatabaseCatalog(next)
+  return next
+}
+
+export function selectDatabaseProfile(id: string): DatabaseCatalog {
+  const catalog = getDatabaseCatalog()
+  if (!catalog.databases.some((database) => database.id === id)) throw new Error('That database is no longer available')
+  const next = { ...catalog, activeId: id }
+  saveDatabaseCatalog(next)
+  return next
+}
 
 function openIndexedDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -23,11 +85,11 @@ function openIndexedDb(): Promise<IDBDatabase> {
   })
 }
 
-async function loadBytes(): Promise<Uint8Array | undefined> {
+async function loadBytes(id: string): Promise<Uint8Array | undefined> {
   const database = await openIndexedDb()
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(IDB_STORE, 'readonly')
-    const request = transaction.objectStore(IDB_STORE).get(DB_KEY)
+    const request = transaction.objectStore(IDB_STORE).get(databaseKey(id))
     request.onsuccess = () => {
       database.close()
       resolve(request.result ? new Uint8Array(request.result as ArrayBuffer) : undefined)
@@ -39,11 +101,11 @@ async function loadBytes(): Promise<Uint8Array | undefined> {
   })
 }
 
-async function saveBytes(bytes: Uint8Array): Promise<void> {
+async function saveBytes(id: string, bytes: Uint8Array): Promise<void> {
   const database = await openIndexedDb()
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(IDB_STORE, 'readwrite')
-    transaction.objectStore(IDB_STORE).put(bytes.slice().buffer, DB_KEY)
+    transaction.objectStore(IDB_STORE).put(bytes.slice().buffer, databaseKey(id))
     transaction.oncomplete = () => {
       database.close()
       resolve()
@@ -55,10 +117,20 @@ async function saveBytes(bytes: Uint8Array): Promise<void> {
   })
 }
 
+async function removeBrowserDatabase(id: string): Promise<void> {
+  const database = await openIndexedDb()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(IDB_STORE, 'readwrite')
+    transaction.objectStore(IDB_STORE).delete(databaseKey(id))
+    transaction.oncomplete = () => { database.close(); resolve() }
+    transaction.onerror = () => { database.close(); reject(transaction.error) }
+  })
+}
+
 class BrowserSqliteAdapter implements DatabaseAdapter {
   readonly kind = 'browser-sqlite' as const
 
-  constructor(private database: SqlJsDatabase, private readonly SQL: SqlJsStatic) {
+  constructor(private database: SqlJsDatabase, private readonly SQL: SqlJsStatic, private readonly id: string) {
     this.exposeForDevtools()
   }
 
@@ -71,7 +143,7 @@ class BrowserSqliteAdapter implements DatabaseAdapter {
   }
 
   private async persist() {
-    await saveBytes(this.database.export())
+    await saveBytes(this.id, this.database.export())
   }
 
   async execute(sql: string, params: unknown[] = []) {
@@ -101,7 +173,7 @@ class BrowserSqliteAdapter implements DatabaseAdapter {
   }
 
   async reload() {
-    const bytes = await loadBytes()
+    const bytes = await loadBytes(this.id)
     if (!bytes) return
     this.database.close()
     this.database = new this.SQL.Database(bytes)
@@ -110,6 +182,10 @@ class BrowserSqliteAdapter implements DatabaseAdapter {
 
   async exportBytes() {
     return this.database.export()
+  }
+
+  async close() {
+    this.database.close()
   }
 }
 
@@ -149,18 +225,39 @@ class TauriSqliteAdapter implements DatabaseAdapter {
     // The native database is already a normal on-disk SQLite file.
     return null
   }
+
+  async close() {
+    const closable = this.database as typeof this.database & { close?: () => Promise<void> }
+    await closable.close?.()
+  }
 }
 
-export async function createDatabase(): Promise<DatabaseAdapter> {
+export async function deleteDatabaseProfile(id: string, kind: DatabaseAdapter['kind']): Promise<DatabaseCatalog> {
+  const catalog = getDatabaseCatalog()
+  if (catalog.activeId === id) throw new Error('Select another database before deleting this one')
+  if (catalog.databases.length <= 1) throw new Error('Keep at least one database')
+  if (!catalog.databases.some((database) => database.id === id)) throw new Error('That database is no longer available')
+  if (kind === 'browser-sqlite') {
+    await removeBrowserDatabase(id)
+  } else {
+    const { invoke } = await import('@tauri-apps/api/core')
+    await invoke('delete_database', { databaseId: id })
+  }
+  const next = { activeId: catalog.activeId, databases: catalog.databases.filter((database) => database.id !== id) }
+  saveDatabaseCatalog(next)
+  return next
+}
+
+export async function createDatabase(id = DEFAULT_DATABASE_ID): Promise<DatabaseAdapter> {
   if (window.__TAURI_INTERNALS__) {
     const { default: Database } = await import('@tauri-apps/plugin-sql')
-    const database = await Database.load('sqlite:sukkot-leaderboard.db')
+    const database = await Database.load(`sqlite:${databaseFileName(id)}`)
     return new TauriSqliteAdapter(database)
   }
 
   const SQL = await initSqlJs({ locateFile: () => wasmUrl })
-  const bytes = await loadBytes()
-  return new BrowserSqliteAdapter(bytes ? new SQL.Database(bytes) : new SQL.Database(), SQL)
+  const bytes = await loadBytes(id)
+  return new BrowserSqliteAdapter(bytes ? new SQL.Database(bytes) : new SQL.Database(), SQL, id)
 }
 
 export async function migrateDatabase(database: DatabaseAdapter) {

@@ -1,4 +1,4 @@
-import { Award, ChartNoAxesCombined, Maximize2, Settings2, TentTree } from 'lucide-react'
+import { Award, ChartNoAxesCombined, Home, Maximize2, Settings2, TentTree } from 'lucide-react'
 import type { ColorTheme, ScoreboardState, ScoreEvent } from '../types'
 import { StatusPill } from './StatusPill'
 import { TeamCard } from './TeamCard'
@@ -9,6 +9,7 @@ import { formatTime } from '../lib/format'
 import { ThemeToggle } from './ThemeToggle'
 import { ActivityTicker } from './ActivityTicker'
 import { AtonementWheel } from './AtonementWheel'
+import { FruitGallery } from './FruitGallery'
 
 export function PublicLeaderboard({ state, status, storageKind, latestEvent, theme, onToggleTheme }: {
   state: ScoreboardState
@@ -39,6 +40,7 @@ export function PublicLeaderboard({ state, status, storageKind, latestEvent, the
           <StatusPill status={status} storageKind={storageKind} compact />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <AtonementWheel weights={state.wheelWeights} />
+          <a className="icon-button" href="#/" title="Open control centre" aria-label="Open control centre"><Home /></a>
           <a className="icon-button" href="#/dashboard" title="Open full data dashboard" aria-label="Open full data dashboard"><ChartNoAxesCombined /></a>
           <a className="icon-button" href="#/certificates" title="Open certificates" aria-label="Open certificates"><Award /></a>
           <button className="icon-button" onClick={enterFullscreen} title="Enter fullscreen" aria-label="Enter fullscreen"><Maximize2 /></button>
@@ -51,6 +53,7 @@ export function PublicLeaderboard({ state, status, storageKind, latestEvent, the
           <TeamCard key={team.id} team={team} score={state.scores[team.id]} rank={index + 1} inventory={state.atonementInventory[team.id]} receipts={state.atonementReceipts} latestEvent={latestEvent} />
         ))}
       </section>
+      <FruitGallery events={state.events} latestEvent={latestEvent} />
       <ProjectorInsights state={state} />
       <TransferMoment event={latestEvent} />
       <ActivityTicker events={state.events} />

@@ -120,7 +120,7 @@ export function DataDashboard({ state, status, storageKind, theme, onToggleTheme
   return (
     <main className="data-dashboard-view compact-dashboard">
       <header className="dashboard-header">
-        <div className="dashboard-title"><a href="#/"><ArrowLeft />Leaderboard</a><p>Whole-event data · Scoring on Day {state.session.activeDay}</p><h1>{state.session.name}</h1></div>
+        <div className="dashboard-title"><a href="#/"><ArrowLeft />Control centre</a><p>Whole-event data · Scoring on Day {state.session.activeDay}</p><h1>{state.session.name}</h1></div>
         <div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><a className="icon-button" href="#/certificates" title="Open certificates" aria-label="Open certificates"><Award /></a><a className="icon-button" href="#/organizer" title="Organizer controls" aria-label="Organizer controls"><Settings2 /></a></div>
       </header>
 

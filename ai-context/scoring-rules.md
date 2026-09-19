@@ -33,6 +33,14 @@ The selected reason label is copied onto each event as an immutable snapshot. A 
 
 If an event was recorded without a useful reason, the organizer can add or replace its displayed reason later from the ledger. This creates an append-only event-reason annotation rather than mutating the score event; the latest annotation is used in derived breakdowns and exports while the original row remains unchanged.
 
+## Fruits of the Spirit
+
+Camp leaders can recognise positive behaviour with the dedicated **Fruits of the Spirit** score-desk tab. Each selection creates one immutable `add` event worth exactly 5 points for the selected house; it does not transfer points from another house or interact with Atonement inventory.
+
+The fixed choices follow Galatians 5:22–23: Love, Joy, Peace, Patience, Kindness, Goodness, Faithfulness, Gentleness, and Self-control. The event reason snapshots `Fruit of the Spirit · <fruit>` and the optional callout note records the leader’s context. These ordinary ledger additions therefore appear in score history, reason analytics, backups, CSV exports, and undo chains without a new mutable score total.
+
+The public projector's shared Fruit board derives a crest badge for every effective Fruit event, grouped under the matching fruit. An undone recognition is absent and a restored recognition returns, just as it does in current scores and analytics.
+
 ## Atonement
 
 Atonement is a consequence for poor behaviour or missed duties. It always transfers from either Judah or Israel to Levi. The offering dropdown is fixed:

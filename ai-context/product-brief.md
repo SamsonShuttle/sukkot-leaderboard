@@ -12,9 +12,10 @@ The three teams are fixed:
 
 ## Application surfaces
 
-- `#/` — compact public projector leaderboard with large current-event rankings, scores, Judah/Israel Atonement wallets, Levi Atonement receipts, a selected-day Point story broken down by reason, offline animated banners, compact analytics, database status, full-screen control, navigation, an always-visible scrolling recent-activity strip, and a non-scoring Atonement decision wheel overlay.
+- `#/` — central control centre that links to every workspace. It is the normal starting page for opening the projector, organizer, dashboard, and awards routes in their own tabs or displays.
+- `#/projector` — compact public projector leaderboard with large current-event rankings, scores, Judah/Israel Atonement wallets, Levi Atonement receipts, a selected-day Point story broken down by reason, offline animated banners, compact analytics, database status, full-screen control, navigation, an always-visible scrolling recent-activity strip, and a non-scoring Atonement decision wheel overlay.
 - `#/dashboard` — one-screen projector data dashboard led by visual analysis: a score-over-time line chart, per-team award-source bars, inflow/outflow donut charts, and the shared activity ticker.
-- `#/organizer` — compact control desk for active-day selection, scoring, Tithe, Atonement, an Add Atonement tab for found-offering inventory entry, inline saved-reason creation and late reason annotation from historical ledger rows, active-day immutable history, and a top-right settings menu for backup/import, CSV export, reset, and wheel odds.
+- `#/organizer` — compact control desk for active-day selection, ordinary scoring, a fixed +5 Fruits of the Spirit recognition tab, Tithe, Atonement, an Add Atonement tab for found-offering inventory entry, inline saved-reason creation and late reason annotation from historical ledger rows, active-day immutable history, and a top-right settings menu for backup/import, CSV export, reset, and wheel odds.
 - `#/certificates` — awards-night gallery of selectable certificates with an animated winner reveal.
 - `#/certificates-admin` — local certificate studio for adding, editing, and removing award titles, citations, and winners.
 

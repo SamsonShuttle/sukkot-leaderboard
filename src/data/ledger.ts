@@ -284,8 +284,8 @@ export function calculateDailyTitheStatus(events: ScoreEvent[], day: TripDay): D
 export class ScoreLedger {
   private constructor(private readonly database: DatabaseAdapter) {}
 
-  static async open() {
-    const database = await createDatabase()
+  static async open(databaseId?: string) {
+    const database = await createDatabase(databaseId)
     await migrateDatabase(database)
     const ledger = new ScoreLedger(database)
     await ledger.seedTeams()
@@ -300,6 +300,10 @@ export class ScoreLedger {
 
   async reload() {
     await this.database.reload()
+  }
+
+  async close() {
+    await this.database.close()
   }
 
   private async seedTeams() {

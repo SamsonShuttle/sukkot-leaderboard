@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
 import {
   ArrowLeftRight, ChevronLeft, CircleMinus, CirclePlus, DatabaseBackup, Download,
-  Droplets, FileDown, Gift, HardDriveDownload, HeartHandshake, History, RotateCcw, Save, Settings2, Upload,
+  Droplets, FileDown, Gift, HardDriveDownload, HeartHandshake, History, RotateCcw, Save, Settings2, Sprout, Upload,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { ATONEMENT_OFFERINGS, ATONEMENT_OPTIONS, SCORING_CONFIG } from '../config'
+import { ATONEMENT_OFFERINGS, ATONEMENT_OPTIONS, FRUITS_OF_THE_SPIRIT, SCORING_CONFIG } from '../config'
 import { downloadFile, eventsToCsv } from '../lib/format'
 import type { AddAtonementInput, ApplyAtonementInput, BackupData, ColorTheme, EventType, NewScoreEvent, ScoreboardState, ScoreEvent, TeamId, TitheRate, TripDay, WheelOutcomeId, WheelWeights } from '../types'
 import { TEAM_IDS, teamById } from '../types'
@@ -16,7 +16,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { WHEEL_OUTCOMES } from '../config'
 import { validateBackup } from '../data/ledger'
 
-type ActionMode = 'add' | 'deduct' | 'transfer' | 'tithe' | 'atonement' | 'inventory'
+type ActionMode = 'add' | 'deduct' | 'transfer' | 'tithe' | 'atonement' | 'fruit' | 'inventory'
 
 const modeInfo: Record<ActionMode, { label: string; icon: typeof CirclePlus; helper: string }> = {
   add: { label: 'Add', icon: CirclePlus, helper: 'Award points to one house' },
@@ -24,6 +24,7 @@ const modeInfo: Record<ActionMode, { label: string; icon: typeof CirclePlus; hel
   transfer: { label: 'Transfer', icon: ArrowLeftRight, helper: 'Move points between houses' },
   tithe: { label: SCORING_CONFIG.specialActions.tithe.label, icon: Droplets, helper: SCORING_CONFIG.specialActions.tithe.helper },
   atonement: { label: SCORING_CONFIG.specialActions.atonement.label, icon: HeartHandshake, helper: SCORING_CONFIG.specialActions.atonement.helper },
+  fruit: { label: 'Fruit of the Spirit', icon: Sprout, helper: SCORING_CONFIG.specialActions.fruit.helper },
   inventory: { label: 'Add Atonement', icon: Gift, helper: 'Add a found Atonement to Judah or Israel' },
 }
 
@@ -49,7 +50,9 @@ function ScoreForm({ state, onRecord, onApplyTithe, onApplyAtonement, onAddAtone
   const [reasonError, setReasonError] = useState('')
   const [atonementIndex, setAtonementIndex] = useState(0)
   const [titheRate, setTitheRate] = useState<TitheRate>(10)
+  const [fruitId, setFruitId] = useState<(typeof FRUITS_OF_THE_SPIRIT)[number]['id']>('love')
   const atonement = SCORING_CONFIG.specialActions.atonement.options[atonementIndex]
+  const fruit = FRUITS_OF_THE_SPIRIT.find((item) => item.id === fruitId)!
   const atonementPoints = 'rate' in atonement ? Math.max(0, Math.round(Math.max(0, state.scores[team]) * atonement.rate / 100)) : atonement.points
   const ownedAtonementCount = team === 'levi'
     ? 0
@@ -62,6 +65,17 @@ function ScoreForm({ state, onRecord, onApplyTithe, onApplyAtonement, onAddAtone
     event.preventDefault()
     setError('')
     if (mode === 'inventory') return
+    if (mode === 'fruit') {
+      setBusy(true)
+      try {
+        localStorage.setItem('sukkot-operator', operator)
+        await onRecord({ type: 'add', points: SCORING_CONFIG.specialActions.fruit.points, destinationTeam: team, operator, note, reason: `Fruit of the Spirit · ${fruit.label}` })
+        setNote('')
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : 'Could not award the Fruit of the Spirit.')
+      } finally { setBusy(false) }
+      return
+    }
     if (mode === 'tithe') {
       setBusy(true)
       try {
@@ -121,14 +135,14 @@ function ScoreForm({ state, onRecord, onApplyTithe, onApplyAtonement, onAddAtone
       <div className="action-tabs" role="tablist">
         {(Object.keys(modeInfo) as ActionMode[]).map((key) => {
           const Icon = modeInfo[key].icon
-          return <button key={key} role="tab" aria-selected={mode === key} className={mode === key ? 'active' : ''} onClick={() => selectMode(key)} type="button"><Icon /><span>{modeInfo[key].label}</span></button>
+          return <button key={key} data-mode={key} role="tab" aria-selected={mode === key} className={mode === key ? 'active' : ''} onClick={() => selectMode(key)} type="button"><Icon /><span>{modeInfo[key].label}</span></button>
         })}
       </div>
       <motion.form role="tabpanel" key={mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} onSubmit={submit} className="score-form">
         <div className={`mode-callout mode-${mode}`}><InfoIcon /><div><strong>{modeInfo[mode].label}</strong><span>{modeInfo[mode].helper}</span></div></div>
         {mode === 'inventory' ? <AtonementInventoryPanel state={state} onAddAtonement={onAddAtonement} /> : <>
         {mode !== 'tithe' ? <>
-          <label className="field-label">{mode === 'add' ? 'Award to' : special ? 'Give from' : mode === 'deduct' ? 'Deduct from' : 'From'}</label>
+          <label className="field-label">{mode === 'add' || mode === 'fruit' ? 'Award to' : special ? 'Give from' : mode === 'deduct' ? 'Deduct from' : 'From'}</label>
           <div className="team-selector">
             {TEAM_IDS.filter((id) => !special || id !== 'levi').map((id) => (
               <button type="button" key={id} data-team={id} onClick={() => setTeam(id)} className={team === id ? 'active' : ''} style={{ '--team': teamById(id)?.color, '--tint': teamById(id)?.tint, '--accent': teamById(id)?.accent } as React.CSSProperties}>
@@ -142,6 +156,7 @@ function ScoreForm({ state, onRecord, onApplyTithe, onApplyAtonement, onAddAtone
         </div></>}
         {special ? <div className={`levi-destination ${mode}`}><span>Flows to</span><img src={teamById('levi')?.bannerUrl} alt="" /><strong>House of Levi</strong></div> : null}
         {mode === 'add' || mode === 'deduct' ? <div className="saved-reason-control"><label className="select-field">Saved reason <span>optional</span><select value={reason} onChange={(event) => { if (event.target.value === '__new__') { setAddingReason(true); return } setReason(event.target.value) }}><option value="">Choose a reason…</option>{state.reasons.filter((item) => item.active).map((item) => <option value={item.label} key={item.id}>{item.label}</option>)}<option value="__new__">＋ Add a new saved reason…</option></select></label>{addingReason ? <div className="inline-reason-add"><input autoFocus maxLength={100} value={newReason} onChange={(event) => setNewReason(event.target.value)} placeholder="New reason" /><button type="button" onClick={() => void saveReason()} disabled={!newReason.trim()}>Add</button></div> : null}{reasonError ? <p className="form-error">{reasonError}</p> : null}</div> : null}
+        {mode === 'fruit' ? <fieldset className="fruit-picker"><legend><strong>Fruit of the Spirit</strong><small>Galatians 5:22–23 · +5 points</small></legend><div>{FRUITS_OF_THE_SPIRIT.map((item) => <button type="button" key={item.id} className={fruitId === item.id ? 'active' : ''} aria-pressed={fruitId === item.id} onClick={() => setFruitId(item.id)}><span className="fruit-option-art" style={{ '--fruit-position': item.spritePosition } as React.CSSProperties} aria-hidden="true" /><span><strong>{item.label}</strong><small>{item.helper}</small></span></button>)}</div></fieldset> : null}
         {mode === 'atonement' ? <fieldset className="atonement-offering-picker"><legend>Atonement offering</legend><div>{SCORING_CONFIG.specialActions.atonement.options.map((option, index) => {
           const available = state.atonementInventory[team][option.id].filter((token) => !token.consumedByEventId).length
           const previewPoints = 'rate' in option ? Math.max(0, Math.round(Math.max(0, state.scores[team]) * option.rate / 100)) : option.points
@@ -153,11 +168,11 @@ function ScoreForm({ state, onRecord, onApplyTithe, onApplyAtonement, onAddAtone
           <div className="tithe-preview"><span><strong>Judah</strong><small>{state.titheStatus.bases.judah} eligible</small><b>−{Math.round(state.titheStatus.bases.judah * titheRate / 100)}</b></span><span><strong>Israel</strong><small>{state.titheStatus.bases.israel} eligible</small><b>−{Math.round(state.titheStatus.bases.israel * titheRate / 100)}</b></span><span className="levi"><strong>Levi receives</strong><small>from both houses</small><b>+{Math.round(state.titheStatus.bases.judah * titheRate / 100) + Math.round(state.titheStatus.bases.israel * titheRate / 100)}</b></span></div>
           {state.titheStatus.appliedRate ? <div className="tithe-applied">A {state.titheStatus.appliedRate}% tithe has already been applied to Day {state.session.activeDay}. Undo its ledger events before applying another.</div> : null}
         </div> : <>
-          {mode !== 'atonement' ? <><label className="field-label" htmlFor="points">Points</label><div className="points-entry"><button type="button" onClick={() => setPoints(Math.max(1, points - 1))}>−</button><input id="points" type="number" min="1" step="1" value={points} onChange={(event) => setPoints(Number(event.target.value))} /><button type="button" onClick={() => setPoints(points + 1)}>+</button></div><div className="quick-points">{SCORING_CONFIG.quickPointValues.map((value) => <button type="button" className={points === value ? 'active' : ''} key={value} onClick={() => setPoints(value)}>{value}</button>)}</div></> : <div className={`fixed-points atonement-event-card ${usesOwnedAtonement ? 'uses-owned' : ''}`}><img src={atonement.imageUrl} alt="" /><div><span>{atonement.label}</span><strong>{usesOwnedAtonement ? `Uses 1 owned ${atonement.label} · ${teamById(team)?.shortName} keeps its points` : 'rate' in atonement ? `${atonementPoints} points · ${atonement.rate}% of ${teamById(team)?.shortName}` : `${atonement.points} points taken from ${teamById(team)?.shortName}`}</strong>{usesOwnedAtonement ? <small>Levi still receives +{atonementPoints} points</small> : null}</div></div>}
+          {mode !== 'atonement' && mode !== 'fruit' ? <><label className="field-label" htmlFor="points">Points</label><div className="points-entry"><button type="button" onClick={() => setPoints(Math.max(1, points - 1))}>−</button><input id="points" type="number" min="1" step="1" value={points} onChange={(event) => setPoints(Number(event.target.value))} /><button type="button" onClick={() => setPoints(points + 1)}>+</button></div><div className="quick-points">{SCORING_CONFIG.quickPointValues.map((value) => <button type="button" className={points === value ? 'active' : ''} key={value} onClick={() => setPoints(value)}>{value}</button>)}</div></> : mode === 'fruit' ? <div className="fixed-points fruit-event-card"><span className="fruit-option-art" style={{ '--fruit-position': fruit.spritePosition } as React.CSSProperties} aria-hidden="true" /><div><span>Fruit of the Spirit · {fruit.label}</span><strong>+{SCORING_CONFIG.specialActions.fruit.points} points to {teamById(team)?.shortName}</strong><small>The fruit is saved permanently with this score event.</small></div></div> : <div className={`fixed-points atonement-event-card ${usesOwnedAtonement ? 'uses-owned' : ''}`}><img src={atonement.imageUrl} alt="" /><div><span>{atonement.label}</span><strong>{usesOwnedAtonement ? `Uses 1 owned ${atonement.label} · ${teamById(team)?.shortName} keeps its points` : 'rate' in atonement ? `${atonementPoints} points · ${atonement.rate}% of ${teamById(team)?.shortName}` : `${atonement.points} points taken from ${teamById(team)?.shortName}`}</strong>{usesOwnedAtonement ? <small>Levi still receives +{atonementPoints} points</small> : null}</div></div>}
         </>}
-        <div className="form-pair"><label>Operator <span>optional</span><input value={operator} onChange={(event) => setOperator(event.target.value)} placeholder="Your name" /></label><label>{mode === 'atonement' ? 'Names / behaviour reason' : 'Note'} <span>optional</span><input value={note} onChange={(event) => setNote(event.target.value)} placeholder={mode === 'atonement' ? 'Who, and what duty or behaviour?' : 'Extra context'} /></label></div>
+        <div className="form-pair"><label>Operator <span>optional</span><input value={operator} onChange={(event) => setOperator(event.target.value)} placeholder="Your name" /></label><label>{mode === 'atonement' ? 'Names / behaviour reason' : mode === 'fruit' ? 'Camp leader callout' : 'Note'} <span>optional</span><input value={note} onChange={(event) => setNote(event.target.value)} placeholder={mode === 'atonement' ? 'Who, and what duty or behaviour?' : mode === 'fruit' ? 'Who showed this fruit, and how?' : 'Extra context'} /></label></div>
         {error && <p className="form-error">{error}</p>}
-        <button className={`primary-action action-${mode}`} disabled={busy || (mode === 'tithe' && Boolean(state.titheStatus.appliedRate)) || (mode === 'atonement' && atonementPoints <= 0)}><Save />{busy ? 'Saving…' : mode === 'tithe' ? `Apply ${titheRate}% tithe to Judah & Israel` : usesOwnedAtonement ? `Offer owned ${atonement.label} · Levi +${atonementPoints}` : `${modeInfo[mode].label} ${mode === 'atonement' ? atonementPoints : points} points`}</button>
+        <button className={`primary-action action-${mode}`} disabled={busy || (mode === 'tithe' && Boolean(state.titheStatus.appliedRate)) || (mode === 'atonement' && atonementPoints <= 0)}><Save />{busy ? 'Saving…' : mode === 'tithe' ? `Apply ${titheRate}% tithe to Judah & Israel` : mode === 'fruit' ? `Award ${fruit.label} · +${SCORING_CONFIG.specialActions.fruit.points} points` : usesOwnedAtonement ? `Offer owned ${atonement.label} · Levi +${atonementPoints}` : `${modeInfo[mode].label} ${mode === 'atonement' ? atonementPoints : points} points`}</button>
         {(mode === 'atonement' ? atonementPoints : points) >= SCORING_CONFIG.largeActionConfirmationAt && mode !== 'add' && mode !== 'tithe' ? <p className="confirmation-hint">You’ll be asked to confirm this larger action.</p> : null}
         </>}
       </motion.form>
@@ -330,7 +345,7 @@ export function OrganizerView({ state, status, storageKind, theme, onToggleTheme
   onSetWheelWeights: (weights: WheelWeights) => Promise<void>
 }) {
   return <main className="organizer-view">
-    <header className="organizer-header"><a href="#/" className="back-link"><ChevronLeft />Projector</a><section className="mini-scoreboard" aria-label="Current event totals">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section><div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><OrganizerSettings state={state} storageKind={storageKind} onNewEvent={onNewEvent} onExportBackup={onExportBackup} onExportDatabase={onExportDatabase} onImport={onImport} onSetWheelWeights={onSetWheelWeights} /></div></header>
+    <header className="organizer-header"><a href="#/" className="back-link"><ChevronLeft />Control centre</a><section className="mini-scoreboard" aria-label="Current event totals">{state.teams.map((team) => <div key={team.id} data-team={team.id} style={{ '--team': team.color, '--accent': team.accent, '--tint': team.tint, '--team-ink': team.foreground } as React.CSSProperties}><img src={team.bannerUrl} alt="" /><span>{team.shortName}</span><AnimatedNumber value={state.scores[team.id]} /></div>)}</section><div className="header-actions"><StatusPill status={status} storageKind={storageKind} compact /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><OrganizerSettings state={state} storageKind={storageKind} onNewEvent={onNewEvent} onExportBackup={onExportBackup} onExportDatabase={onExportDatabase} onImport={onImport} onSetWheelWeights={onSetWheelWeights} /></div></header>
     <DaySwitcher activeDay={state.session.activeDay} summaries={state.daySummaries} onSelect={onSetDay} />
     <div className="score-context-label">Current event totals · New entries and undos are tagged Day {state.session.activeDay}</div>
     <div className="organizer-grid"><ScoreForm state={state} onRecord={onRecord} onApplyTithe={onApplyTithe} onApplyAtonement={onApplyAtonement} onAddAtonement={onAddAtonement} onAddReason={onAddReason} /><aside className="organizer-side"><div className="control-card history-card"><div className="control-card-heading"><div><p className="eyebrow">Immutable ledger</p><h2>Day {state.session.activeDay} activity</h2></div><History /></div><ActivityFeed events={state.events} limit={50} organizer groupedByDay daySummaries={state.daySummaries} activeDay={state.session.activeDay} reasons={state.reasons} onAddReason={onAddReason} onAddEventReason={onAddEventReason} onUndo={(event) => void onUndo(event)} /></div></aside></div>

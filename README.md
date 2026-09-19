@@ -13,7 +13,8 @@ npm run dev
 
 Vite prints the available addresses. The default local URL is **http://localhost:5173/**.
 
-- Projector view: [http://localhost:5173/](http://localhost:5173/)
+- Control centre: [http://localhost:5173/](http://localhost:5173/)
+- Projector view: [http://localhost:5173/#/projector](http://localhost:5173/#/projector)
 - Data dashboard: [http://localhost:5173/#/dashboard](http://localhost:5173/#/dashboard)
 - Organizer controls: [http://localhost:5173/#/organizer](http://localhost:5173/#/organizer)
 
@@ -36,8 +37,9 @@ The standard projector view includes a compact **Point story** strip, a slow con
 
 ## Persistence model
 
-- **Browser development:** `sql.js` runs actual SQLite in WebAssembly. After every mutation, the SQLite database bytes are saved to IndexedDB under `sukkot-leaderboard-storage`. No network or backend is involved.
-- **Tauri desktop:** `@tauri-apps/plugin-sql` opens `sqlite:sukkot-leaderboard.db` on disk. Install the [Rust prerequisites for Tauri](https://v2.tauri.app/start/prerequisites/) before using the Tauri commands.
+- **Database library:** The control centre selects one named SQLite database for every open tab. Create a fresh database there without changing existing ones; select another database before deleting one, and export a backup first if you might need it again. The active selection synchronizes between local tabs.
+- **Browser development:** `sql.js` runs actual SQLite in WebAssembly. After every mutation, the active database bytes are saved to IndexedDB under `sukkot-leaderboard-storage`. No network or backend is involved.
+- **Tauri desktop:** `@tauri-apps/plugin-sql` opens a separate on-disk SQLite file for each library entry. Install the [Rust prerequisites for Tauri](https://v2.tauri.app/start/prerequisites/) before using the Tauri commands.
 - Scores are calculated from an append-only `score_events` ledger. Add, deduct, transfer, tithe, atonement, seed, and undo are distinct event types.
 - Each event is assigned to one of the eight trip days. The organizer's day selector tags new entries and determines the Daily Tithe base; it does not filter the current leaderboard, dashboard, or organizer KPIs.
 - Organizer history is grouped by day and shows each house's closing total after every day. Existing databases are migrated safely, with older events assigned to Day 1.
@@ -48,14 +50,14 @@ The standard projector view includes a compact **Point story** strip, a slow con
 - In **Organizer settings**, adjust each wheel result between Off, Rare, Low, Standard, Likely, and Favoured. Wheel odds persist in SQLite and are included in JSON backups.
 - Starting a new event creates a new scoring session and selects it as active. Earlier sessions remain available in JSON backups.
 
-For safe live use, export a JSON backup before the event and after each day. JSON import replaces the current local database after confirmation. CSV export contains the active session's event history for reporting.
+For safe live use, export a JSON backup before the event and after each day. JSON import replaces the selected local database after confirmation. CSV export contains the selected database's active session history for reporting.
 
 ### Inspecting the SQLite database
 
 There is no SQLite server to connect to: SQLite is an embedded file/database engine.
 
-- **Browser development:** `sql.js` keeps a real SQLite database in memory and serializes its bytes to IndexedDB database `sukkot-leaderboard-storage`, object store `database`, key `sukkot-leaderboard-sqlite-v1`. In Organizer settings, choose **SQLite DB** to download a normal `.sqlite3` snapshot, then open it with DB Browser for SQLite, a VS Code SQLite viewer, DataGrip, or `sqlite3 path/to/file.sqlite3`.
-- **Tauri app:** the SQL plugin stores `sukkot-leaderboard.db` under the app configuration directory. With the current bundle identifier, the macOS path is normally `~/Library/Application Support/org.sukkotcamp.leaderboard/sukkot-leaderboard.db`. Close the app or inspect a copied snapshot rather than editing the live file.
+- **Browser development:** `sql.js` keeps a real SQLite database in memory and serializes each library entry into IndexedDB database `sukkot-leaderboard-storage`, object store `database`. The original database remains at key `sukkot-leaderboard-sqlite-v1`; additional entries use an ID-suffixed key. In Organizer settings, choose **SQLite DB** to download the selected database as a normal `.sqlite3` snapshot, then open it with DB Browser for SQLite, a VS Code SQLite viewer, DataGrip, or `sqlite3 path/to/file.sqlite3`.
+- **Tauri app:** the SQL plugin stores the original entry as `sukkot-leaderboard.db` and additional library entries as `sukkot-leaderboard-<id>.db` under the app configuration directory. With the current bundle identifier, the macOS path is normally `~/Library/Application Support/org.sukkotcamp.leaderboard/`. Close the app or inspect a copied snapshot rather than editing a live file.
 
 JSON backup, history CSV, and browser SQLite exports show an inline success or error message. Imports are fully validated before the existing database is replaced, and the replacement remains one SQLite transaction.
 

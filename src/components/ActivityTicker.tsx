@@ -3,7 +3,7 @@ import { Radio } from 'lucide-react'
 import { eventLabel, formatTime } from '../lib/format'
 import type { ScoreEvent } from '../types'
 import { teamById } from '../types'
-import { atonementOfferingById, atonementOfferingForReason } from '../config'
+import { atonementOfferingById, atonementOfferingForReason, FRUITS_OF_THE_SPIRIT } from '../config'
 import { buildEventChains } from '../lib/eventChains'
 
 export function ActivityTicker({ events, limit = 12 }: { events: ScoreEvent[]; limit?: number }) {
@@ -21,6 +21,9 @@ export function ActivityTicker({ events, limit = 12 }: { events: ScoreEvent[]; l
             const latestReversal = chain.reversals.at(-1)
             const team = teamById(event.destinationTeam ?? event.sourceTeam ?? event.inventoryTeam)
             const offering = event.atonementOffering ? atonementOfferingById(event.atonementOffering) : event.type === 'atonement' ? atonementOfferingForReason(event.reason) : undefined
+            const fruit = event.type === 'add' && event.reason?.startsWith('Fruit of the Spirit ·')
+              ? FRUITS_OF_THE_SPIRIT.find((item) => item.label === event.reason?.replace('Fruit of the Spirit · ', ''))
+              : undefined
             return (
               <motion.article
                 aria-hidden={index >= visible.length}
@@ -32,7 +35,7 @@ export function ActivityTicker({ events, limit = 12 }: { events: ScoreEvent[]; l
                 exit={{ opacity: 0, y: -8 }}
               >
                 <i />
-                {offering ? <img className={`ticker-offering-art ${event.inventoryDelta === -1 ? 'used' : ''}`} src={offering.imageUrl} alt="" /> : null}
+                {fruit ? <span className="ticker-fruit-art" style={{ '--fruit-position': fruit.spritePosition } as React.CSSProperties} aria-hidden="true" /> : offering ? <img className={`ticker-offering-art ${event.inventoryDelta === -1 ? 'used' : ''}`} src={offering.imageUrl} alt="" /> : null}
                 <div className={`ticker-copy${chain.active ? '' : ' is-undone'}`}><strong>{eventLabel(event)}</strong><span>Day {event.day} · {formatTime(event.createdAt)}{event.reason ? ` · ${event.reason}` : ''}{latestReversal ? ` · ${chain.active ? 'Restored' : 'Undone'} ${formatTime(latestReversal.createdAt)}` : ''}</span></div>
               </motion.article>
             )

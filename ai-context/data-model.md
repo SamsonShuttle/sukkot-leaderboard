@@ -50,7 +50,7 @@ Key/value application settings. `active_session_id` points to the current scorin
 
 ## Score derivation
 
-`calculateScores()` walks every active-session ledger event and subtracts from sources/adds to destinations. No mutable score column exists. A token-funded Atonement has no score source and Levi as its destination, so Levi gains points while the owning house is unchanged. `calculateAtonementInventory()` derives Judah and Israel's found, ready, and spent Turtle Dove, Ram, Ox, and 10% Tithe tokens from effective ledger events; no mutable inventory total exists. A spent 10% Tithe records the percentage-derived point value calculated at use time. `calculateAtonementReceipts()` derives Levi's effective receipt counts from Atonement events originating with Judah or Israel. The organizer's active day does not filter these current totals. `calculateDaySummaries()` separately derives daily changes and cumulative closing scores. `calculateDailyTitheStatus()` uses the active recording day to derive eligible daily bases and detect an active prior Tithe.
+`calculateScores()` walks every active-session ledger event and subtracts from sources/adds to destinations. No mutable score column exists. A token-funded Atonement has no score source and Levi as its destination, so Levi gains points while the owning house is unchanged. `calculateAtonementInventory()` derives Judah and Israel's found, ready, and spent Turtle Dove, Ram, Ox, and 10% Tithe tokens from effective ledger events; no mutable inventory total exists. A spent 10% Tithe records the percentage-derived point value calculated at use time. `calculateAtonementReceipts()` derives Levi's effective receipt counts from Atonement events originating with Judah or Israel. The projector's Fruit board likewise groups effective `add` events whose reason starts `Fruit of the Spirit ·` by their fixed fruit label and destination house; it stores no badge count or award table. The organizer's active day does not filter these current totals. `calculateDaySummaries()` separately derives daily changes and cumulative closing scores. `calculateDailyTitheStatus()` uses the active recording day to derive eligible daily bases and detect an active prior Tithe.
 
 ## Dashboard derivation
 
@@ -60,14 +60,16 @@ Add future data dimensions to the immutable event schema and analytics types/fun
 
 ## Browser and native persistence
 
-- Browser: `sql.js` runs SQLite in WebAssembly. Serialized database bytes are persisted to IndexedDB after mutations.
-- Tauri: `@tauri-apps/plugin-sql` opens `sqlite:sukkot-leaderboard.db` on disk.
-- Browser tabs use `BroadcastChannel` to reload changed bytes and update projector/dashboard views.
+- The control-centre database library holds lightweight metadata (name, opaque ID, created time, and active selection) outside the score data. Each entry represents a separate complete SQLite ledger; it is not a `scoring_session`.
+- Browser: `sql.js` runs SQLite in WebAssembly. Serialized database bytes are persisted to IndexedDB after mutations. The legacy/default entry keeps the stable key `sukkot-leaderboard-sqlite-v1`; additional entries use that key with an opaque-ID suffix.
+- Tauri: `@tauri-apps/plugin-sql` opens `sqlite:sukkot-leaderboard.db` for the default entry and an ID-suffixed file for each additional entry.
+- Browser tabs use `BroadcastChannel` to reload changed bytes, synchronize active-database selection, and update projector/dashboard views.
+- A database must not be deleted while it is selected, and the final remaining entry cannot be deleted. Browser deletion removes its IndexedDB bytes; Tauri deletion removes its selected inactive file. This is an explicit whole-database destructive action and never changes individual ledger events.
 
-Browser IndexedDB details are intentionally stable for troubleshooting: database `sukkot-leaderboard-storage`, object store `database`, key `sukkot-leaderboard-sqlite-v1`. The organizer can export those bytes as a standard `.sqlite3` snapshot for IDE inspection. Native SQLite is stored relative to Tauri's app configuration directory.
+Browser IndexedDB details are intentionally stable for troubleshooting: database `sukkot-leaderboard-storage`, object store `database`, default key `sukkot-leaderboard-sqlite-v1`. The organizer can export the selected database bytes as a standard `.sqlite3` snapshot for IDE inspection. Native SQLite is stored relative to Tauri's app configuration directory.
 
 Migrations inspect SQLite schema with `PRAGMA table_info` before adding newer columns so first-release databases upgrade in place. New annotation tables are created idempotently alongside the existing ledger tables.
 
 ## Backup compatibility
 
-JSON backup contains teams, sessions, events, event-reason annotations, settings, and saved reasons. Import validates all required table arrays, the three house records, active-session reference, event types, point values, days, house references, annotation targets, and optional Atonement inventory fields before starting replacement. It then uses one transaction with explicit column lists and defaults missing legacy `active_day`, `day_number`, `reason`, and Atonement inventory values safely. CSV includes the effective day, reason, Atonement inventory fields, operator, note, and reversal identifiers.
+JSON backup contains teams, sessions, events, event-reason annotations, settings, and saved reasons for the selected database only. Import validates all required table arrays, the three house records, active-session reference, event types, point values, days, house references, annotation targets, and optional Atonement inventory fields before starting replacement. It then uses one transaction with explicit column lists and defaults missing legacy `active_day`, `day_number`, `reason`, and Atonement inventory values safely. CSV includes the effective day, reason, Atonement inventory fields, operator, note, and reversal identifiers.
